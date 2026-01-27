@@ -1,0 +1,73 @@
+package com.cbnuccc.cbnuccc.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.stereotype.Service;
+
+import com.cbnuccc.cbnuccc.Dto.UserDto;
+import com.cbnuccc.cbnuccc.Model.User;
+import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
+
+@Service
+public class UserService {
+    @Autowired
+    private UserJpaRepository userJpaRepository;
+
+    private UserDto UserToUserDto(User user) {
+        return new UserDto(
+                user.getUuid(),
+                user.getEmail(),
+                user.getRank(),
+                user.getSex(),
+                user.getName(),
+                user.getGrade(),
+                user.getBirthDate());
+    }
+
+    private User UserDtoToUser(UserDto userDto) {
+        User user = new User();
+        user.setEmail(userDto.getEmail());
+        user.setUuid(userDto.getUuid());
+        user.setRank(userDto.getRank());
+        user.setSex(userDto.getSex());
+        user.setName(userDto.getName());
+        user.setGrade(userDto.getGrade());
+        user.setBirthDate(userDto.getBirthDate());
+        return user;
+    }
+
+    public List<UserDto> getAllUsers(UserDto exampleUser) {
+        User example = UserDtoToUser(exampleUser);
+        List<User> users = userJpaRepository.findAll(Example.of(example));
+
+        List<UserDto> ret = new ArrayList<UserDto>();
+        for (User user : users) {
+            UserDto userDto = UserToUserDto(user);
+            ret.add(userDto);
+        }
+
+        return ret;
+    }
+
+    public Optional<UserDto> createUser(User user) {
+        user.setUuid(UUID.randomUUID());
+        user.setSalt("testsalt");
+
+        try {
+            userJpaRepository.save(user);
+            return Optional.ofNullable(UserToUserDto(user));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public boolean checkDuplicatedUserByEmail(String email) {
+        Optional<User> user = userJpaRepository.findByEmail(email);
+        return user.isPresent();
+    }
+}
