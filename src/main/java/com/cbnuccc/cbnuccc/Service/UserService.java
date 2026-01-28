@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
 import org.springframework.stereotype.Service;
 
+import com.cbnuccc.cbnuccc.ErrorCode;
 import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.User;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
@@ -69,5 +70,36 @@ public class UserService {
     public boolean checkDuplicatedUserByEmail(String email) {
         Optional<User> user = userJpaRepository.findByEmail(email);
         return user.isPresent();
+    }
+
+    public ErrorCode updateUserByUuid(UUID uuid, User user) {
+        Optional<User> _oldUser = userJpaRepository.findByUuid(uuid);
+        if (_oldUser.isEmpty())
+            return ErrorCode.NO_USER_FOUND;
+
+        User oldUser = _oldUser.get();
+        if (user.getId() != null ||
+                user.getUuid() != null ||
+                user.getSalt() != null ||
+                user.getStudentId() != null)
+            return ErrorCode.CONNOT_CHANGE_IMPORTANT_INFORMATION;
+
+        if (user.getEmail() != null)
+            oldUser.setEmail(user.getEmail());
+        if (user.getPassword() != null)
+            oldUser.setPassword(user.getPassword());
+        if (user.getRank() != null)
+            oldUser.setRank(user.getRank());
+        if (user.getSex() != null)
+            oldUser.setSex(user.getSex());
+        if (user.getName() != null)
+            oldUser.setName(user.getName());
+        if (user.getGrade() != null)
+            oldUser.setGrade(user.getGrade());
+        if (user.getBirthDate() != null)
+            oldUser.setBirthDate(user.getBirthDate());
+
+        userJpaRepository.save(oldUser);
+        return ErrorCode.NO_ERROR;
     }
 }

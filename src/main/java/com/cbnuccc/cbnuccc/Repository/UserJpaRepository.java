@@ -9,4 +9,6 @@ import com.cbnuccc.cbnuccc.Model.User;
 
 public interface UserJpaRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByUuid(UUID uuid);
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -67,5 +68,14 @@ public class UserController {
             return ErrorCode.SOMETHING_WENT_WRONG.makeErrorResponseEntity();
 
         return ResponseEntity.status(HttpStatus.OK).body(result.get());
+    }
+
+    // update user by uuid
+    @PatchMapping("/user/{uuid}")
+    public ResponseEntity<?> updateUser(@PathVariable("uuid") UUID uuid, @RequestBody User user) {
+        ErrorCode resultCode = userService.updateUserByUuid(uuid, user);
+        if (resultCode != ErrorCode.NO_ERROR)
+            return resultCode.makeErrorResponseEntity();
+        return getUserByUuid(uuid);
     }
 }
