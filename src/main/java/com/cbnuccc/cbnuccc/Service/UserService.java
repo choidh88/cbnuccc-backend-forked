@@ -19,6 +19,7 @@ public class UserService {
     @Autowired
     private UserJpaRepository userJpaRepository;
 
+    // make User to UserDto.
     private UserDto UserToUserDto(User user) {
         return new UserDto(
                 user.getUuid(),
@@ -30,6 +31,7 @@ public class UserService {
                 user.getBirthDate());
     }
 
+    // make UserDto to User.
     private User UserDtoToUser(UserDto userDto) {
         User user = new User();
         user.setEmail(userDto.getEmail());
@@ -42,6 +44,7 @@ public class UserService {
         return user;
     }
 
+    // find a user by given uuid.
     public Optional<UserDto> findUserByUuid(UUID uuid) {
         Optional<User> _user = userJpaRepository.findByUuid(uuid);
         if (_user.isEmpty())
@@ -50,7 +53,8 @@ public class UserService {
         return Optional.of(result);
     }
 
-    public List<UserDto> getAllUsers(UserDto exampleUser) {
+    // find all of users that are matched with given UserDto.
+    public List<UserDto> findAllMatchedUsers(UserDto exampleUser) {
         User example = UserDtoToUser(exampleUser);
         List<User> users = userJpaRepository.findAll(Example.of(example));
 
@@ -63,6 +67,9 @@ public class UserService {
         return ret;
     }
 
+    // create a user.
+    // returning value is null when creation of a user is failed,
+    // but returning value is a user being created when it is successed.
     public Optional<UserDto> createUser(User user) {
         user.setUuid(UUID.randomUUID());
         user.setSalt("testsalt");
@@ -75,11 +82,15 @@ public class UserService {
         }
     }
 
+    // check a user by email if it is duplicated.
     public boolean checkDuplicatedUserByEmail(String email) {
         Optional<User> user = userJpaRepository.findByEmail(email);
         return user.isPresent();
     }
 
+    // update a user to given user by uuid.
+    // if any given user's field is null,
+    // the matched field of the user is not changed.
     public ErrorCode updateUserByUuid(UUID uuid, User user) {
         Optional<User> _oldUser = userJpaRepository.findByUuid(uuid);
         if (_oldUser.isEmpty())
@@ -92,6 +103,7 @@ public class UserService {
                 user.getStudentId() != null)
             return ErrorCode.CONNOT_CHANGE_IMPORTANT_INFORMATION;
 
+        // if the field value is not null, change it.
         if (user.getEmail() != null)
             oldUser.setEmail(user.getEmail());
         if (user.getPassword() != null)
@@ -111,6 +123,7 @@ public class UserService {
         return ErrorCode.NO_ERROR;
     }
 
+    // delete a user by uuid.
     public ErrorCode deleteUserByUuid(UUID uuid) {
         Optional<User> _user = userJpaRepository.findByUuid(uuid);
         if (_user.isEmpty())

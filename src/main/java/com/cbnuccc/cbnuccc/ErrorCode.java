@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 
 public enum ErrorCode {
+    // Error codes
     NO_ERROR(HttpStatus.OK, "There is no error.", -1),
     SOMETHING_WENT_WRONG(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong.", 0),
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "Inputted email is duplicated.", 1),
@@ -23,6 +24,7 @@ public enum ErrorCode {
         this.errorCode = code;
     }
 
+    // make response entity of when returning an error.
     public ResponseEntity<?> makeErrorResponseEntity() {
         return ResponseEntity.status(responseStatus).body(Map.of(
                 "errorCode", errorCode,

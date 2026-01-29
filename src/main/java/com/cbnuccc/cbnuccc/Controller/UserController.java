@@ -36,7 +36,7 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<List<UserDto>> getUser(
             @ModelAttribute UserDto userDto) {
-        List<UserDto> dtos = userService.getAllUsers(userDto);
+        List<UserDto> dtos = userService.findAllMatchedUsers(userDto);
         return ResponseEntity.status(HttpStatus.OK).body(dtos);
     }
 
