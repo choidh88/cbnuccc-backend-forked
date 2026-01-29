@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -74,6 +75,15 @@ public class UserController {
     @PatchMapping("/user/{uuid}")
     public ResponseEntity<?> updateUser(@PathVariable("uuid") UUID uuid, @RequestBody User user) {
         ErrorCode resultCode = userService.updateUserByUuid(uuid, user);
+        if (resultCode != ErrorCode.NO_ERROR)
+            return resultCode.makeErrorResponseEntity();
+        return getUserByUuid(uuid);
+    }
+
+    // delete user by uuid
+    @DeleteMapping("/user/{uuid}")
+    public ResponseEntity<?> deleteUser(@PathVariable("uuid") UUID uuid) {
+        ErrorCode resultCode = userService.deleteUserByUuid(uuid);
         if (resultCode != ErrorCode.NO_ERROR)
             return resultCode.makeErrorResponseEntity();
         return getUserByUuid(uuid);

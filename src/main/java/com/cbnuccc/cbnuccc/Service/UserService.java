@@ -102,4 +102,14 @@ public class UserService {
         userJpaRepository.save(oldUser);
         return ErrorCode.NO_ERROR;
     }
+
+    public ErrorCode deleteUserByUuid(UUID uuid) {
+        Optional<User> _user = userJpaRepository.findByUuid(uuid);
+        if (_user.isEmpty())
+            return ErrorCode.NO_USER_FOUND;
+
+        User user = _user.get();
+        userJpaRepository.delete(user);
+        return ErrorCode.NO_ERROR;
+    }
 }
