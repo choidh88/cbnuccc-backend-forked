@@ -80,7 +80,7 @@ public class UserController {
         return getUserByUuid(uuid);
     }
 
-    // delete user by uuid
+    // delete a user by uuid
     @DeleteMapping("/user/{uuid}")
     public ResponseEntity<?> deleteUser(@PathVariable("uuid") UUID uuid) {
         Optional<UserDto> _deletedUser = userService.findUserByUuid(uuid);
