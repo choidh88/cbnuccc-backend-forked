@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.cbnuccc.cbnuccc.ErrorCode;
@@ -14,10 +15,16 @@ import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.User;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
 
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 @Service
 public class UserService {
     @Autowired
     private UserJpaRepository userJpaRepository;
+
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
 
     // make User to UserDto.
     private UserDto UserToUserDto(User user) {
@@ -41,6 +48,24 @@ public class UserService {
         user.setName(userDto.getName());
         user.setGrade(userDto.getGrade());
         user.setBirthDate(userDto.getBirthDate());
+        return user;
+    }
+
+    // make encoded string from given string.
+    private String encodePassword(String password) {
+        return passwordEncoder.encode(password);
+    }
+
+    // check if plane and hashed string are actually same.
+    private boolean checkMatched(String planePassword, String encodedPassword) {
+        return passwordEncoder.matches(planePassword, encodedPassword);
+    }
+
+    // make user's password encoded.
+    private User makeUserPasswordEncoded(User user) {
+        String planePassword = user.getPassword();
+        String encodedPassword = encodePassword(planePassword);
+        user.setPassword(encodedPassword);
         return user;
     }
 
@@ -74,6 +99,9 @@ public class UserService {
         user.setUuid(UUID.randomUUID());
         user.setSalt("testsalt");
 
+        // encoding the password.
+        user = makeUserPasswordEncoded(user);
+
         try {
             userJpaRepository.save(user);
             return Optional.ofNullable(UserToUserDto(user));
@@ -106,8 +134,9 @@ public class UserService {
         // if the field value is not null, change it.
         if (user.getEmail() != null)
             oldUser.setEmail(user.getEmail());
-        if (user.getPassword() != null)
-            oldUser.setPassword(user.getPassword());
+        if (user.getPassword() != null) {
+            oldUser = makeUserPasswordEncoded(oldUser);
+        }
         if (user.getRank() != null)
             oldUser.setRank(user.getRank());
         if (user.getSex() != null)
