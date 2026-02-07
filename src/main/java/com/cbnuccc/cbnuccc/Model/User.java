@@ -29,8 +29,6 @@ public class User {
 
     private String password;
 
-    private String salt;
-
     // UserDto
     private Short rank;
 

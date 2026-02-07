@@ -97,7 +97,6 @@ public class UserService {
     // create a user.
     public ResponseEntity<?> createUser(User user) {
         user.setUuid(UUID.randomUUID());
-        user.setSalt("testsalt");
 
         if (checkDuplicatedUserByEmail(user.getEmail()))
             return ErrorCode.DUPLICATED_EMAIL.makeErrorResponseEntity();
@@ -132,7 +131,6 @@ public class UserService {
         User oldUser = _oldUser.get();
         if (user.getId() != null ||
                 user.getUuid() != null ||
-                user.getSalt() != null ||
                 user.getStudentId() != null)
             return ErrorCode.CONNOT_CHANGE_IMPORTANT_INFORMATION;
 
