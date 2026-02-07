@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,9 @@ public class UserService {
 
     @Autowired
     private final PasswordEncoder passwordEncoder;
+
+    @Value("${pepper}")
+    private final String pepper;
 
     // make User to UserDto.
     private UserDto UserToUserDto(User user) {
@@ -55,12 +59,12 @@ public class UserService {
 
     // make encoded string from given string.
     private String encodePassword(String password) {
-        return passwordEncoder.encode(password);
+        return passwordEncoder.encode(password + pepper);
     }
 
     // check if plane and hashed string are actually same.
     private boolean checkMatched(String planePassword, String encodedPassword) {
-        return passwordEncoder.matches(planePassword, encodedPassword);
+        return passwordEncoder.matches(planePassword + pepper, encodedPassword);
     }
 
     // make user's password encoded.
