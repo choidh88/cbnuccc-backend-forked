@@ -30,18 +30,15 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             jwtToken = authHeader.substring(7);
         } else {
-            filterChain.doFilter(request, response);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-
-        System.out.println(jwtToken);
 
         Claims claim;
         try {
             claim = loginService.extractToken(jwtToken);
         } catch (Exception e) {
-            // TODO: change below log.
-            System.out.println("유효기간 만료되거나 이상함");
+            System.err.println("Expired token or something went wrong.");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
