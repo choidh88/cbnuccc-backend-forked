@@ -57,8 +57,7 @@ public class UserService {
     }
 
     // make user's password encoded.
-    private MyUser makeUserPasswordEncoded(MyUser user) {
-        String planePassword = user.getPassword();
+    private MyUser encodeUserPassword(MyUser user, String planePassword) {
         String encodedPassword = encodePassword(planePassword);
         user.setPassword(encodedPassword);
         return user;
@@ -95,7 +94,7 @@ public class UserService {
             return ErrorCode.DUPLICATED_EMAIL.makeErrorResponseEntity();
 
         // encoding the password.
-        user = makeUserPasswordEncoded(user);
+        user = encodeUserPassword(user, user.getPassword());
 
         try {
             MyUser createdUser = userJpaRepository.save(user);
@@ -131,8 +130,7 @@ public class UserService {
         if (user.getEmail() != null)
             oldUser.setEmail(user.getEmail());
         if (user.getPassword() != null) {
-            oldUser.setPassword(user.getPassword());
-            oldUser = makeUserPasswordEncoded(oldUser);
+            oldUser = encodeUserPassword(oldUser, user.getPassword());
         }
         if (user.getRank() != null)
             oldUser.setRank(user.getRank());
