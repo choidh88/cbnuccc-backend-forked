@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cbnuccc.cbnuccc.ErrorCode;
+import com.cbnuccc.cbnuccc.Dto.LimitedUserDto;
 import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.MyUser;
 import com.cbnuccc.cbnuccc.Service.UserService;
@@ -29,28 +30,27 @@ public class UserController {
     // main page
     @GetMapping("/")
     public String home() {
-        return "Hello!";
+        return "Hello!\nI am okay!\nYou found this... r u a programmer? haha.";
     }
 
-    // get users like userDto
+    // get users
     @GetMapping("/user")
-    public ResponseEntity<List<UserDto>> getUser(
-            @ModelAttribute UserDto userDto) {
-        List<UserDto> dtos = userService.findAllMatchedUsers(userDto);
+    public ResponseEntity<List<LimitedUserDto>> getUser(@ModelAttribute LimitedUserDto userDto) {
+        List<LimitedUserDto> dtos = userService.findAllMatchedUsers(userDto);
         return ResponseEntity.ok(dtos);
     }
 
     // get a user by uuid
     @GetMapping("/user/{uuid}")
     public ResponseEntity<?> getUserByUuid(@PathVariable("uuid") UUID uuid) {
-        UserDto user = new UserDto();
+        LimitedUserDto user = new LimitedUserDto();
         user.setUuid(uuid);
 
-        List<UserDto> resultBody = (List<UserDto>) getUser(user).getBody();
+        List<LimitedUserDto> resultBody = (List<LimitedUserDto>) getUser(user).getBody();
         if (resultBody.size() == 0)
             return ErrorCode.NO_USER_FOUND.makeErrorResponseEntity();
 
-        UserDto result = resultBody.get(0);
+        LimitedUserDto result = resultBody.get(0);
         return ResponseEntity.ok(result);
     }
 

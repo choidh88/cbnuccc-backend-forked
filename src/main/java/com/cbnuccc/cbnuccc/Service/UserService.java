@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.cbnuccc.cbnuccc.ErrorCode;
 import com.cbnuccc.cbnuccc.SecurityUtil;
+import com.cbnuccc.cbnuccc.Dto.LimitedUserDto;
 import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.MyUser;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
@@ -28,7 +29,7 @@ public class UserService {
     private final SecurityUtil securityUtil;
 
     // make User to UserDto.
-    private UserDto UserToUserDto(MyUser user) {
+    private UserDto userToUserDto(MyUser user) {
         return new UserDto(
                 user.getUuid(),
                 user.getEmail(),
@@ -40,7 +41,7 @@ public class UserService {
     }
 
     // make UserDto to User.
-    private MyUser UserDtoToUser(UserDto userDto) {
+    private MyUser userDtoToUser(UserDto userDto) {
         MyUser user = new MyUser();
         user.setEmail(userDto.getEmail());
         user.setUuid(userDto.getUuid());
@@ -50,6 +51,26 @@ public class UserService {
         user.setGrade(userDto.getGrade());
         user.setBirthDate(userDto.getBirthDate());
         return user;
+    }
+
+    // make UserDto to LimitedUserDto.
+    private LimitedUserDto userDtoToLimitedUserDto(UserDto userDto) {
+        LimitedUserDto dto = new LimitedUserDto(
+                userDto.getUuid(),
+                userDto.getRank(),
+                userDto.getName(),
+                userDto.getGrade());
+        return dto;
+    }
+
+    // make LimitedUserDto to UserDto.
+    private UserDto limitedUserDtoToUserDto(LimitedUserDto limitedUserDto) {
+        UserDto dto = new UserDto();
+        dto.setUuid(limitedUserDto.getUuid());
+        dto.setRank(limitedUserDto.getRank());
+        dto.setName(limitedUserDto.getName());
+        dto.setGrade(limitedUserDto.getGrade());
+        return dto;
     }
 
     // make user's password encoded.
@@ -64,18 +85,19 @@ public class UserService {
         Optional<MyUser> _user = userJpaRepository.findByUuid(uuid);
         if (_user.isEmpty())
             return Optional.ofNullable(null);
-        UserDto result = UserToUserDto(_user.get());
+        UserDto result = userToUserDto(_user.get());
         return Optional.of(result);
     }
 
     // find all of users that are matched with given UserDto.
-    public List<UserDto> findAllMatchedUsers(UserDto exampleUser) {
-        MyUser example = UserDtoToUser(exampleUser);
+    public List<LimitedUserDto> findAllMatchedUsers(LimitedUserDto exampleUser) {
+        // make LimitedUserDto to User
+        MyUser example = userDtoToUser(limitedUserDtoToUserDto(exampleUser));
         List<MyUser> users = userJpaRepository.findAll(Example.of(example));
 
-        List<UserDto> ret = new ArrayList<UserDto>();
+        List<LimitedUserDto> ret = new ArrayList<LimitedUserDto>();
         for (MyUser user : users) {
-            UserDto userDto = UserToUserDto(user);
+            LimitedUserDto userDto = userDtoToLimitedUserDto(userToUserDto(user));
             ret.add(userDto);
         }
 
@@ -101,7 +123,7 @@ public class UserService {
 
         try {
             MyUser createdUser = userJpaRepository.save(user);
-            UserDto createdUserDto = UserToUserDto(createdUser);
+            UserDto createdUserDto = userToUserDto(createdUser);
             return ResponseEntity.status(HttpStatus.OK).body(createdUserDto);
         } catch (Exception e) {
             System.err.println(e);
