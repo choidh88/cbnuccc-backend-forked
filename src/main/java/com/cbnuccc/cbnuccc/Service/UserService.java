@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Example;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -79,6 +80,13 @@ public class UserService {
         }
 
         return ret;
+    }
+
+    // get uuid from given jwt token.
+    public UUID getUuidFromAuth(Authentication authentication) {
+        String uuidString = (String) authentication.getPrincipal();
+        UUID uuid = UUID.fromString(uuidString);
+        return uuid;
     }
 
     // create a user.

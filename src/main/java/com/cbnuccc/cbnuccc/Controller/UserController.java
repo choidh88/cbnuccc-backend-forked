@@ -54,6 +54,17 @@ public class UserController {
         return ResponseEntity.ok(result);
     }
 
+    // get my user data
+    @GetMapping("/me")
+    public ResponseEntity<?> getMyUserData(Authentication authentication) {
+        UUID uuid = userService.getUuidFromAuth(authentication);
+        Optional<UserDto> _me = userService.findUserByUuid(uuid);
+        if (_me.isEmpty())
+            return ErrorCode.NO_USER_FOUND.makeErrorResponseEntity();
+        UserDto me = _me.get();
+        return ResponseEntity.ok(me);
+    }
+
     // create user, but the user's email should not be same with other's email.
     @PostMapping("/user")
     public ResponseEntity<?> createUser(@RequestBody MyUser user) {
@@ -63,11 +74,7 @@ public class UserController {
     // update user by uuid
     @PatchMapping("/user")
     public ResponseEntity<?> updateUser(Authentication authentication, @RequestBody MyUser user) {
-        // process given jwt token.
-        String uuidString = (String) authentication.getPrincipal();
-        UUID uuid = UUID.fromString(uuidString);
-
-        // update user.
+        UUID uuid = userService.getUuidFromAuth(authentication);
         ErrorCode resultCode = userService.updateUserByUuid(uuid, user);
         if (resultCode != ErrorCode.NO_ERROR)
             return resultCode.makeErrorResponseEntity();
@@ -77,11 +84,7 @@ public class UserController {
     // delete a user by uuid
     @DeleteMapping("/user")
     public ResponseEntity<?> deleteUser(Authentication authentication) {
-        // process given jwt token.
-        String uuidString = (String) authentication.getPrincipal();
-        UUID uuid = UUID.fromString(uuidString);
-
-        // delete user.
+        UUID uuid = userService.getUuidFromAuth(authentication);
         Optional<UserDto> _deletedUser = userService.findUserByUuid(uuid);
 
         ErrorCode resultCode = userService.deleteUserByUuid(uuid);

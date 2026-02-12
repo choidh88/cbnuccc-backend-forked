@@ -12,6 +12,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.cbnuccc.cbnuccc.ErrorCode;
 import com.cbnuccc.cbnuccc.SecurityUtil;
 
 import io.jsonwebtoken.Claims;
@@ -37,7 +38,9 @@ public class JwtFilter extends OncePerRequestFilter {
         String authString = request.getHeader("Authorization");
         Optional<String> _jwtToken = securityUtil.getAuthorizationToken(authString);
         if (_jwtToken == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                    ErrorCode.INVALID_TOKEN.getResponseStatus().value(),
+                    ErrorCode.INVALID_TOKEN.getErrorMessage());
             return;
         }
         String jwtToken = _jwtToken.get();
@@ -47,8 +50,9 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             claim = securityUtil.extractToken(jwtToken);
         } catch (Exception e) {
-            System.err.println("Expired token or something went wrong.");
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.sendError(
+                    ErrorCode.INVALID_TOKEN.getResponseStatus().value(),
+                    ErrorCode.INVALID_TOKEN.getErrorMessage());
             return;
         }
 
