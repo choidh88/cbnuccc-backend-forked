@@ -17,14 +17,18 @@ import com.cbnuccc.cbnuccc.SecurityUtil;
 import com.cbnuccc.cbnuccc.Dto.LimitedUserDto;
 import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.MyUser;
+import com.cbnuccc.cbnuccc.Model.Verification;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
+import com.cbnuccc.cbnuccc.Repository.VerificationJpaRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class UserService {
     private final UserJpaRepository userJpaRepository;
+    private final VerificationJpaRepository verificationJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtil securityUtil;
 
@@ -80,6 +84,23 @@ public class UserService {
         return user;
     }
 
+    // check a user by email if it is duplicated.
+    private boolean checkDuplicatedUserByEmail(String email) {
+        Optional<MyUser> user = userJpaRepository.findByEmail(email);
+        return user.isPresent();
+    }
+
+    // if the email is verified, it returns true.
+    // otherwise, it returns false.
+    // also, if the email is not on the DB, it returns false.
+    private boolean checkIsVerifiedEmail(String email) {
+        Optional<Verification> _verification = verificationJpaRepository.findByEmail(email);
+        if (_verification.isEmpty())
+            return false;
+        Verification verification = _verification.get();
+        return verification.getIsVerified();
+    }
+
     // find UserDto by given uuid.
     public Optional<UserDto> findUserDtoByUuid(UUID uuid) {
         Optional<MyUser> _user = userJpaRepository.findByUuid(uuid);
@@ -121,29 +142,29 @@ public class UserService {
     }
 
     // create a user.
+    @Transactional
     public ResponseEntity<?> createUser(MyUser user) {
         user.setUuid(UUID.randomUUID());
+        String email = user.getEmail();
 
-        if (checkDuplicatedUserByEmail(user.getEmail()))
+        if (checkDuplicatedUserByEmail(email))
             return StatusCode.DUPLICATED_EMAIL.makeErrorResponseEntity();
+
+        if (!checkIsVerifiedEmail(email))
+            return StatusCode.NOT_VERIFIED.makeErrorResponseEntity();
 
         // encoding the password.
         user = encodeUserPassword(user, user.getPassword());
 
         try {
             MyUser createdUser = userJpaRepository.save(user);
+            verificationJpaRepository.deleteByEmail(email); // delete verified user from verification table.
             UserDto createdUserDto = userToUserDto(createdUser);
             return ResponseEntity.status(HttpStatus.OK).body(createdUserDto);
         } catch (Exception e) {
             System.err.println(e);
             return StatusCode.SOMETHING_WENT_WRONG.makeErrorResponseEntity();
         }
-    }
-
-    // check a user by email if it is duplicated.
-    public boolean checkDuplicatedUserByEmail(String email) {
-        Optional<MyUser> user = userJpaRepository.findByEmail(email);
-        return user.isPresent();
     }
 
     // update a user to given user by uuid.

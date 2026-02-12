@@ -20,7 +20,8 @@ public enum StatusCode {
     WRONG_CODE(HttpStatus.BAD_REQUEST, "Given code is wrong.", 6),
     REQUEST_IS_EXPIRED(HttpStatus.BAD_REQUEST, "The request is expired.", 7),
     NO_ENOUGH_ARGS(HttpStatus.BAD_REQUEST, "There are no enough arguments.", 8),
-    ALREADY_VERIFIED(HttpStatus.OK, "Given code is already verified.", 9);
+    ALREADY_VERIFIED(HttpStatus.OK, "Given code is already verified.", 9),
+    NOT_VERIFIED(HttpStatus.FORBIDDEN, "Given user is not verified.", 10);
 
     @Getter
     private final HttpStatusCode responseStatus;

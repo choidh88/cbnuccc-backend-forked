@@ -34,6 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
     // list of methods and uris which does not need to get filtered.
     private static final List<ExcludePath> EXCLUDE_LIST = List.of(
             new ExcludePath(HttpMethod.GET, "/user"),
+            new ExcludePath(HttpMethod.POST, "/user"),
             new ExcludePath(HttpMethod.GET, "/user/*"),
             new ExcludePath(HttpMethod.POST, "/login"),
             new ExcludePath(HttpMethod.GET, "/email"),

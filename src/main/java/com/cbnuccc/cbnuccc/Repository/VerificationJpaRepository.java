@@ -11,4 +11,6 @@ public interface VerificationJpaRepository extends JpaRepository<Verification, I
     Optional<Verification> findByEmail(String email);
 
     void deleteByExpireAtBeforeAndIsVerifiedFalse(OffsetDateTime time);
+
+    void deleteByEmail(String email);
 }
