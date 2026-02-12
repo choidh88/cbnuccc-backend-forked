@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -36,7 +37,7 @@ public class UserController {
     // get users
     @GetMapping("/user")
     public ResponseEntity<List<LimitedUserDto>> getUser(@ModelAttribute LimitedUserDto userDto) {
-        List<LimitedUserDto> dtos = userService.findAllMatchedUsers(userDto);
+        List<LimitedUserDto> dtos = userService.findAllMatchedLimitedUserDtos(userDto);
         return ResponseEntity.ok(dtos);
     }
 
@@ -58,7 +59,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<?> getMyUserData(Authentication authentication) {
         UUID uuid = userService.getUuidFromAuth(authentication);
-        Optional<UserDto> _me = userService.findUserByUuid(uuid);
+        Optional<UserDto> _me = userService.findUserDtoByUuid(uuid);
         if (_me.isEmpty())
             return ErrorCode.NO_USER_FOUND.makeErrorResponseEntity();
         UserDto me = _me.get();
@@ -78,20 +79,20 @@ public class UserController {
         ErrorCode resultCode = userService.updateUserByUuid(uuid, user);
         if (resultCode != ErrorCode.NO_ERROR)
             return resultCode.makeErrorResponseEntity();
-        return getUserByUuid(uuid);
+        return getMyUserData(authentication);
     }
 
     // delete a user by uuid
     @DeleteMapping("/user")
     public ResponseEntity<?> deleteUser(Authentication authentication) {
         UUID uuid = userService.getUuidFromAuth(authentication);
-        Optional<UserDto> _deletedUser = userService.findUserByUuid(uuid);
+        ResponseEntity<?> _deletedUser = getMyUserData(authentication);
 
         ErrorCode resultCode = userService.deleteUserByUuid(uuid);
-        if (resultCode != ErrorCode.NO_ERROR || _deletedUser.isEmpty())
+        if (resultCode != ErrorCode.NO_ERROR || _deletedUser.getStatusCode() != HttpStatus.OK)
             return resultCode.makeErrorResponseEntity();
 
-        UserDto deletedUser = _deletedUser.get();
+        UserDto deletedUser = (UserDto) _deletedUser.getBody();
         return ResponseEntity.ok(deletedUser);
     }
 }

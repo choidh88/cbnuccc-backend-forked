@@ -80,8 +80,8 @@ public class UserService {
         return user;
     }
 
-    // find a user by given uuid.
-    public Optional<UserDto> findUserByUuid(UUID uuid) {
+    // find UserDto by given uuid.
+    public Optional<UserDto> findUserDtoByUuid(UUID uuid) {
         Optional<MyUser> _user = userJpaRepository.findByUuid(uuid);
         if (_user.isEmpty())
             return Optional.ofNullable(null);
@@ -89,8 +89,17 @@ public class UserService {
         return Optional.of(result);
     }
 
+    // find LimitedUserDto by given uuid.
+    public Optional<LimitedUserDto> findLimitedUserDtoByUuid(UUID uuid) {
+        Optional<MyUser> _user = userJpaRepository.findByUuid(uuid);
+        if (_user.isEmpty())
+            return Optional.ofNullable(null);
+        LimitedUserDto result = userDtoToLimitedUserDto(userToUserDto(_user.get()));
+        return Optional.of(result);
+    }
+
     // find all of users that are matched with given UserDto.
-    public List<LimitedUserDto> findAllMatchedUsers(LimitedUserDto exampleUser) {
+    public List<LimitedUserDto> findAllMatchedLimitedUserDtos(LimitedUserDto exampleUser) {
         // make LimitedUserDto to User
         MyUser example = userDtoToUser(limitedUserDtoToUserDto(exampleUser));
         List<MyUser> users = userJpaRepository.findAll(Example.of(example));
