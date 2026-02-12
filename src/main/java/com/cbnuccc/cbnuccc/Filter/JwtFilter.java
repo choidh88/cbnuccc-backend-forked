@@ -5,14 +5,17 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cbnuccc.cbnuccc.ErrorCode;
+import com.cbnuccc.cbnuccc.ExcludePath;
 import com.cbnuccc.cbnuccc.SecurityUtil;
 
 import io.jsonwebtoken.Claims;
@@ -26,14 +29,27 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private SecurityUtil securityUtil;
 
+    private static final AntPathMatcher matcher = new AntPathMatcher();
+
+    // list of methods and uris which does not need to get filtered.
+    private static final List<ExcludePath> EXCLUDE_LIST = List.of(
+            new ExcludePath(HttpMethod.GET, "/user"),
+            new ExcludePath(HttpMethod.GET, "/user/*"),
+            new ExcludePath(HttpMethod.POST, "/login"));
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String requestUri = request.getRequestURI();
+        HttpMethod requestMethod = HttpMethod.valueOf(request.getMethod());
+
+        return EXCLUDE_LIST.stream()
+                .anyMatch(exclude -> exclude.method() == requestMethod &&
+                        matcher.match(exclude.uriPattern(), requestUri));
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        if (request.getRequestURI().equals("/login")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
         // get Auth. header to get jwt token.
         String authString = request.getHeader("Authorization");
         Optional<String> _jwtToken = securityUtil.getAuthorizationToken(authString);
