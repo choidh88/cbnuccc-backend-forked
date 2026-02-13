@@ -6,6 +6,8 @@ import java.util.Optional;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.cbnuccc.cbnuccc.StatusCode;
@@ -17,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@EnableScheduling
 public class VerificationService {
     private final JavaMailSender javaMailSender;
     private final VerificationJpaRepository verificationJpaRepository;
@@ -36,7 +39,9 @@ public class VerificationService {
         return false;
     }
 
-    // delete all expired tuples.
+    // delete all expired tuples a minute.
+    // 1000 ms/s * 60 s/min = 60000 ms/min (1 min)
+    @Scheduled(fixedRate = 1000 * 60)
     @Transactional
     public void deleteAllExpiredEmails() {
         verificationJpaRepository.deleteByExpireAtBeforeAndIsVerifiedFalse(OffsetDateTime.now(ZoneId.of("Asia/Seoul")));

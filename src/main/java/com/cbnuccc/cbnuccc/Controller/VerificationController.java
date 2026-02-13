@@ -5,10 +5,8 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.cbnuccc.cbnuccc.StatusCode;
@@ -22,22 +20,19 @@ public class VerificationController {
     @Autowired
     VerificationService verificationService;
 
-    // 1000 ms/s * 60 s/min = 60000 ms/min (1 min)
-    @Scheduled(fixedRate = 1000 * 60)
-    public void before() {
-        // delete all expired emails. (pre-process)
-        verificationService.deleteAllExpiredEmails();
-    }
-
     @PostMapping("/verification")
-    public ResponseEntity<?> sendEmailToVerify(@RequestParam("to") String to) {
+    public ResponseEntity<?> sendEmailToVerify(@RequestBody Map<String, String> body) {
+        if (!body.containsKey("email"))
+            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
+
+        String email = body.get("email");
         final String code = verificationService.makeCode();
 
-        StatusCode err = verificationService.saveEmailVerification(to, code);
+        StatusCode err = verificationService.saveEmailVerification(email, code);
         if (err.checkIsError())
             return err.makeErrorResponseEntity();
 
-        err = verificationService.sendMailCode(to, code);
+        err = verificationService.sendMailCode(email, code);
         if (err.checkIsError())
             return err.makeErrorResponseEntity();
 
