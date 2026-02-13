@@ -37,8 +37,8 @@ public class JwtFilter extends OncePerRequestFilter {
             new ExcludePath(HttpMethod.POST, "/user"),
             new ExcludePath(HttpMethod.GET, "/user/*"),
             new ExcludePath(HttpMethod.POST, "/login"),
-            new ExcludePath(HttpMethod.GET, "/email"),
-            new ExcludePath(HttpMethod.POST, "/email"));
+            new ExcludePath(HttpMethod.POST, "/verification"),
+            new ExcludePath(HttpMethod.POST, "/verification/confirmation"));
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
