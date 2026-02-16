@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,22 +46,19 @@ public class UserController {
     }
 
     // get a user by uuid
-    // @Deprecated
-    // @GetMapping("/user/{uuid}")
-    // public ResponseEntity<?> getUserByUuid(@PathVariable("uuid") UUID uuid) {
-    // LimitedUserDto user = new LimitedUserDto();
-    // user.setUuid(uuid);
+    @GetMapping("/user/{uuid}")
+    public ResponseEntity<?> getUserByUuid(@PathVariable("uuid") UUID uuid) {
+        LimitedUserDto user = new LimitedUserDto();
+        user.setUuid(uuid);
 
-    // List<LimitedUserDto> resultBody = (List<LimitedUserDto>)
-    // getUser(user).getBody();
-    // if (resultBody.size() == 0)
-    // return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(uuid, "GOT
-    // USER");
+        List<LimitedUserDto> resultBody = (List<LimitedUserDto>) getUser(user).getBody();
+        if (resultBody.size() == 0)
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(uuid, "GOT USER");
 
-    // LogUtil.printBasicInfoLog("GOT USER", "successfully got a user", uuid);
-    // LimitedUserDto result = resultBody.get(0);
-    // return ResponseEntity.ok(result);
-    // }
+        LogUtil.printBasicInfoLog("GOT USER", "successfully got a user", uuid);
+        LimitedUserDto result = resultBody.get(0);
+        return ResponseEntity.ok(result);
+    }
 
     // get my user data
     @GetMapping("/me")
