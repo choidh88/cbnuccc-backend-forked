@@ -14,8 +14,8 @@ import io.jsonwebtoken.security.Keys;
 import lombok.Data;
 import lombok.Getter;
 
-@Data
 @Component
+@Data
 public class SecurityUtil {
     private final String pepper;
 
@@ -28,15 +28,25 @@ public class SecurityUtil {
     @Getter
     private final String mailgunDomain;
 
+    @Getter
+    private final String supbaseBaseUrl;
+
+    @Getter
+    private final String supabaseKey;
+
     public SecurityUtil(
             @Value("${pepper}") String pepper,
             @Value("${jwtkey}") String jwtKey,
             @Value("${mailgun.key}") String mailgunKey,
-            @Value("${mailgun.domain}") String mailgunDomain) {
+            @Value("${mailgun.domain}") String mailgunDomain,
+            @Value("${supabase.base-url}") String supbaseBaseUrl,
+            @Value("${supabase.key}") String supabaseKey) {
         this.pepper = pepper;
         this.jwtKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtKey));
         this.mailgunKey = mailgunKey;
         this.mailgunDomain = mailgunDomain;
+        this.supbaseBaseUrl = supbaseBaseUrl;
+        this.supabaseKey = supabaseKey;
     }
 
     // return a password with pepper.

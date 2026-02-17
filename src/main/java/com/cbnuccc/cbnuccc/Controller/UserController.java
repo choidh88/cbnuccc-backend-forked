@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.cbnuccc.cbnuccc.Dto.LimitedUserDto;
 import com.cbnuccc.cbnuccc.Dto.UserDto;
 import com.cbnuccc.cbnuccc.Model.MyUser;
+import com.cbnuccc.cbnuccc.Service.ImageService;
 import com.cbnuccc.cbnuccc.Service.UserService;
 import com.cbnuccc.cbnuccc.Util.DataWithStatusCode;
 import com.cbnuccc.cbnuccc.Util.LogUtil;
@@ -30,6 +33,9 @@ import com.cbnuccc.cbnuccc.Util.StatusCode;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ImageService imageService;
 
     // main page
     @GetMapping("/")
@@ -122,5 +128,15 @@ public class UserController {
         UserDto deletedUser = (UserDto) _deletedUser.getBody();
         LogUtil.printBasicInfoLog("DELETED USER", "successfully deleted a user", uuid);
         return ResponseEntity.ok(deletedUser);
+    }
+
+    @PostMapping("/image")
+    public ResponseEntity<?> uploadProfileImage(Authentication authentication,
+            @RequestParam("file") MultipartFile file) {
+        UUID uuid = userService.getUuidFromAuth(authentication);
+        Optional<UserDto> _user = userService.findUserDtoByUuid(uuid);
+        if (_user.isEmpty())
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(uuid, "UPLOAD PROFILE IMAGE");
+        return imageService.uploadProfileImage(file).makeErrorResponseEntityAndPrintLog(uuid, "UPLOAD PROFILE IMAGE");
     }
 }
