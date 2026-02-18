@@ -18,7 +18,11 @@ public enum LogHeader {
     CREATE_PRAYER,
     GET_PRAYER,
     UPDATE_PRAYER,
-    DELETE_PRAYER;
+    DELETE_PRAYER,
+    CREATE_MISSION,
+    GET_MISSION,
+    UPDATE_MISSION,
+    DELETE_MISSION;
 
     @Getter
     private final String header;

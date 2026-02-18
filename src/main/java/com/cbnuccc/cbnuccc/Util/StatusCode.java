@@ -25,7 +25,8 @@ public enum StatusCode {
     NOT_VERIFIED(HttpStatus.FORBIDDEN, "Given user is not verified.", 10),
     NOT_DUPLICATED_EMAIL(HttpStatus.OK, "Given email is not duplicate.", 11),
     EMPTY_GIVEN_IMAGE(HttpStatus.NOT_FOUND, "Given image is empty.", 12),
-    NO_PRAYER_FOUND(HttpStatus.NOT_FOUND, "Cannot found given prayer.", 13);
+    NO_PRAYER_FOUND(HttpStatus.NOT_FOUND, "Cannot found given prayer.", 13),
+    NO_MISSION_FOUND(HttpStatus.NOT_FOUND, "Cannot found given mission.", 14);
 
     @Getter
     private final HttpStatusCode responseStatus;

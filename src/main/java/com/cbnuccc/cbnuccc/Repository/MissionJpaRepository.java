@@ -1,0 +1,27 @@
+package com.cbnuccc.cbnuccc.Repository;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.cbnuccc.cbnuccc.Model.Mission;
+
+public interface MissionJpaRepository extends JpaRepository<Mission, Integer> {
+    // find all missions by given uuid.
+    List<Mission> findAllByAuthorUuid(UUID uuid);
+
+    Optional<Mission> findByIdAndAuthorUuid(int id, UUID uuid);
+
+    // get author's uuid.
+    @Query("""
+                select u.uuid
+                from Mission m
+                join m.author u
+                where m.id = :missionId
+            """)
+    Optional<UUID> findAuthorUuidByMissionId(@Param("missionId") Integer missionId);
+}
