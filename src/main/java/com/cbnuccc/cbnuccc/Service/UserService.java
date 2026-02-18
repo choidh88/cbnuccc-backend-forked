@@ -134,7 +134,7 @@ public class UserService {
     }
 
     // find all of users that are matched with given UserDto.
-    public List<LimitedUserDto> findAllMatchedLimitedUserDtos(LimitedUserDto exampleUser) {
+    public List<LimitedUserDto> findAllLimitedUserDtosByLimitedUserDto(LimitedUserDto exampleUser) {
         // make LimitedUserDto to User
         MyUser example = userDtoToUser(limitedUserDtoToUserDto(exampleUser));
         List<MyUser> users = userJpaRepository.findAll(Example.of(example));

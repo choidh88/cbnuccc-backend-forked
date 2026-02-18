@@ -41,7 +41,7 @@ public class UserController {
     // get users
     @GetMapping("/user")
     public ResponseEntity<List<LimitedUserDto>> getUser(@ModelAttribute LimitedUserDto userDto) {
-        List<LimitedUserDto> dtos = userService.findAllMatchedLimitedUserDtos(userDto);
+        List<LimitedUserDto> dtos = userService.findAllLimitedUserDtosByLimitedUserDto(userDto);
         String log = String.format("successfully got %d users", dtos.size());
         LogUtil.printBasicInfoLog("GOT USER", log, null);
         return ResponseEntity.ok(dtos);
