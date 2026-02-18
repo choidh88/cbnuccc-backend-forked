@@ -72,10 +72,10 @@ public class PrayerService {
     }
 
     // create a prayer.
-    public StatusCode createPrayer(PrayerDto prayerDto, UUID uuid) {
+    public DataWithStatusCode<PrayerDto> createPrayer(PrayerDto prayerDto, UUID uuid) {
         Optional<MyUser> _author = userJpaRepository.findByUuid(uuid);
         if (_author.isEmpty())
-            return StatusCode.NO_USER_FOUND;
+            return new DataWithStatusCode<>(StatusCode.NO_USER_FOUND, null);
         MyUser author = _author.get();
 
         Prayer prayer = new Prayer();
@@ -85,10 +85,10 @@ public class PrayerService {
         prayer.setAuthor(author);
 
         try {
-            prayerJpaRepository.save(prayer);
-            return StatusCode.NO_ERROR;
+            Prayer craetedPrayer = prayerJpaRepository.save(prayer);
+            return new DataWithStatusCode<>(StatusCode.NO_ERROR, prayerToPrayerDto(craetedPrayer));
         } catch (Exception e) {
-            return StatusCode.SOMETHING_WENT_WRONG;
+            return new DataWithStatusCode<>(StatusCode.SOMETHING_WENT_WRONG, null);
         }
     }
 
@@ -111,6 +111,22 @@ public class PrayerService {
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
             LogUtil.printBasicWarnLog(LogHeader.UPDATE_PRAYER, e.getMessage(), uuid);
+            return StatusCode.SOMETHING_WENT_WRONG;
+        }
+    }
+
+    // delete a prayer
+    public StatusCode deletePrayer(int id, UUID uuid) {
+        Optional<Prayer> _prayer = prayerJpaRepository.findByIdAndAuthorUuid(id, uuid);
+        if (_prayer.isEmpty())
+            return StatusCode.NO_PRAYER_FOUND;
+        Prayer prayer = _prayer.get();
+
+        try {
+            prayerJpaRepository.delete(prayer);
+            return StatusCode.NO_ERROR;
+        } catch (Exception e) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PRAYER, e.getMessage(), uuid);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }

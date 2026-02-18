@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -76,8 +77,10 @@ public class PrayerController {
     @PostMapping("/prayer")
     public ResponseEntity<?> createPrayer(Authentication authentication, @RequestBody PrayerDto prayerDto) {
         UUID uuid = userService.getUuidFromAuth(authentication);
-        StatusCode result = prayerService.createPrayer(prayerDto, uuid);
-        return result.makeErrorResponseEntityAndPrintLog(LogHeader.CREATE_PRAYER, uuid);
+        DataWithStatusCode<PrayerDto> result = prayerService.createPrayer(prayerDto, uuid);
+        if (result.code().checkIsError())
+            result.code().makeErrorResponseEntityAndPrintLog(LogHeader.CREATE_PRAYER, uuid);
+        return ResponseEntity.ok(result.data());
     }
 
     // update a prayer
@@ -94,5 +97,26 @@ public class PrayerController {
         String message = String.format("successfully update a prayer #%d", id);
         LogUtil.printBasicInfoLog(LogHeader.UPDATE_PRAYER, message, uuid);
         return getMyPrayerById(authentication, id);
+    }
+
+    // delete a prayer
+    @DeleteMapping("/prayer/{id}")
+    public ResponseEntity<?> deletePrayer(
+            Authentication authentication,
+            @PathVariable("id") int id) {
+        UUID uuid = userService.getUuidFromAuth(authentication);
+
+        DataWithStatusCode<PrayerDto> _deletedPrayer = prayerService.getPrayerById(id, uuid);
+        if (_deletedPrayer.code().checkIsError())
+            return _deletedPrayer.code().makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PRAYER, uuid);
+        PrayerDto deletedPrayer = _deletedPrayer.data();
+
+        StatusCode result = prayerService.deletePrayer(id, uuid);
+        if (result.checkIsError())
+            return result.makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PRAYER, uuid);
+
+        String message = String.format("successfully delete a prayer #%d", id);
+        LogUtil.printBasicInfoLog(LogHeader.DELETE_PRAYER, message, uuid);
+        return ResponseEntity.ok(deletedPrayer);
     }
 }
