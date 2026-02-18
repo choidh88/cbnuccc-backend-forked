@@ -15,7 +15,9 @@ public enum LogHeader {
     LOGIN,
     SEND_REGISTRATION_EMAIL,
     CONFIRM_REGISTRATION_CODE,
-    CREATE_PRAYER;
+    CREATE_PRAYER,
+    GET_PRAYER,
+    UPDATE_PRAYER;
 
     @Getter
     private final String header;
