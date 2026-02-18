@@ -1,6 +1,7 @@
 package com.cbnuccc.cbnuccc.Dto;
 
 import java.time.OffsetDateTime;
+import java.util.UUID;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,11 +9,14 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class PrayerDto {
-    Integer id;
+    private Integer id;
 
-    OffsetDateTime createdAt;
+    // this field is not on the DB.
+    private UUID authorUuid;
 
-    String request;
+    private OffsetDateTime createdAt;
 
-    Boolean anonymous;
+    private String request;
+
+    private Boolean anonymous;
 }
