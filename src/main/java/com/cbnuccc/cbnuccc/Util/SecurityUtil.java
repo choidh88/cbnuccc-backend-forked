@@ -11,12 +11,21 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.Data;
+import lombok.Getter;
 
 @Component
+@Data
 public class SecurityUtil {
     private final String pepper;
+
+    @Getter
     private final SecretKey jwtKey;
+
+    @Getter
     private final String mailgunKey;
+
+    @Getter
     private final String mailgunDomain;
 
     public SecurityUtil(
@@ -28,18 +37,6 @@ public class SecurityUtil {
         this.jwtKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtKey));
         this.mailgunKey = mailgunKey;
         this.mailgunDomain = mailgunDomain;
-    }
-
-    public SecretKey getJwtKey() {
-        return this.jwtKey;
-    }
-
-    public String getMailgunKey() {
-        return this.mailgunKey;
-    }
-
-    public String getMailgunDomain() {
-        return this.mailgunDomain;
     }
 
     // return a password with pepper.

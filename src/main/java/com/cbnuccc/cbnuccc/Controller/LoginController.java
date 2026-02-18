@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.cbnuccc.cbnuccc.Dto.TokenDto;
 import com.cbnuccc.cbnuccc.Service.LoginService;
+import com.cbnuccc.cbnuccc.Util.LogHeader;
 import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 
@@ -20,21 +21,21 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class LoginController {
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final LoginService loginService;
-    private final SecurityUtil securityUtil;
+        private final AuthenticationManagerBuilder authenticationManagerBuilder;
+        private final LoginService loginService;
+        private final SecurityUtil securityUtil;
 
-    @PostMapping("/login")
-    public ResponseEntity<?> loginJWT(@RequestBody Map<String, String> data) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                data.get("email"), securityUtil.addPepper(data.get("password")));
+        @PostMapping("/login")
+        public ResponseEntity<?> loginJWT(@RequestBody Map<String, String> data) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                                data.get("email"), securityUtil.addPepper(data.get("password")));
 
-        Authentication auth = authenticationManagerBuilder.getObject().authenticate(authToken);
+                Authentication auth = authenticationManagerBuilder.getObject().authenticate(authToken);
 
-        String token = loginService.createToken(auth, data.get("email"));
-        TokenDto tokenDto = new TokenDto(token);
+                String token = loginService.createToken(auth, data.get("email"));
+                TokenDto tokenDto = new TokenDto(token);
 
-        LogUtil.printBasicInfoLog("LOGIN", "successfully logged-in", null);
-        return ResponseEntity.ok(tokenDto);
-    }
+                LogUtil.printBasicInfoLog(LogHeader.LOGIN, "successfully logged-in", null);
+                return ResponseEntity.ok(tokenDto);
+        }
 }

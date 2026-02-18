@@ -23,7 +23,8 @@ public enum StatusCode {
     NO_ENOUGH_ARGS(HttpStatus.BAD_REQUEST, "There are no enough arguments.", 8),
     ALREADY_VERIFIED(HttpStatus.OK, "Given code is already verified.", 9),
     NOT_VERIFIED(HttpStatus.FORBIDDEN, "Given user is not verified.", 10),
-    NOT_DUPLICATED_EMAIL(HttpStatus.OK, "Given email is not duplicate.", 11);
+    NOT_DUPLICATED_EMAIL(HttpStatus.OK, "Given email is not duplicate.", 11),
+    EMPTY_GIVEN_IMAGE(HttpStatus.NOT_FOUND, "Given image is empty.", 12);
 
     @Getter
     private final HttpStatusCode responseStatus;
@@ -48,8 +49,14 @@ public enum StatusCode {
     }
 
     // make response entity of when returning an error with a error log.
-    public ResponseEntity<?> makeErrorResponseEntityAndPrintLog(UUID uuid, String subHeader) {
-        LogUtil.printErrorLog(this, uuid, subHeader);
+    public ResponseEntity<?> makeErrorResponseEntityAndPrintLog(LogHeader header, UUID uuid) {
+        if (this.checkIsError())
+            LogUtil.printErrorLog(header, this, uuid);
+        else
+            LogUtil.printBasicInfoLog(header,
+                    String.format("%s - %s", responseStatus.toString(), errorMessage),
+                    uuid);
+
         return ResponseEntity.status(responseStatus).body(Map.of(
                 "errorCode", errorCode,
                 "message", errorMessage));
