@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.cbnuccc.cbnuccc.Model.Verification;
 import com.cbnuccc.cbnuccc.Repository.VerificationJpaRepository;
+import com.cbnuccc.cbnuccc.Util.LogHeader;
+import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
@@ -85,7 +87,7 @@ public class VerificationService {
             if (request.getStatus() != 200)
                 return StatusCode.SOMETHING_WENT_WRONG;
         } catch (UnirestException e) {
-            e.printStackTrace();
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, e.getMessage(), null);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
         return StatusCode.NO_ERROR;
@@ -111,7 +113,7 @@ public class VerificationService {
             verificationJpaRepository.save(verification);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            System.err.println(e);
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, e.getMessage(), null);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -136,7 +138,7 @@ public class VerificationService {
             try {
                 verificationJpaRepository.delete(verification);
             } catch (Exception e) {
-                System.err.println(e);
+                LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, e.getMessage(), null);
                 return StatusCode.SOMETHING_WENT_WRONG;
             }
             return StatusCode.REQUEST_IS_EXPIRED;
@@ -148,7 +150,7 @@ public class VerificationService {
         try {
             verificationJpaRepository.save(verification);
         } catch (Exception e) {
-            System.err.println(e);
+            LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, e.getMessage(), null);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
 

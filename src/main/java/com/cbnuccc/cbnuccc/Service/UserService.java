@@ -21,6 +21,8 @@ import com.cbnuccc.cbnuccc.Model.Verification;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
 import com.cbnuccc.cbnuccc.Repository.VerificationJpaRepository;
 import com.cbnuccc.cbnuccc.Util.DataWithStatusCode;
+import com.cbnuccc.cbnuccc.Util.LogHeader;
+import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
@@ -176,6 +178,7 @@ public class UserService {
             LimitedUserDto createdLimitedUserDto = userDtoToLimitedUserDto(userToUserDto(createdUser));
             return new DataWithStatusCode<LimitedUserDto>(StatusCode.NO_ERROR, createdLimitedUserDto);
         } catch (Exception e) {
+            LogUtil.printBasicWarnLog(LogHeader.CREATE_USER, e.getMessage(), null);
             return new DataWithStatusCode<>(StatusCode.SOMETHING_WENT_WRONG, null);
         }
     }
@@ -226,6 +229,7 @@ public class UserService {
             userJpaRepository.delete(user);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_USER, e.getMessage(), uuid);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -257,6 +261,7 @@ public class UserService {
                     .block();
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, e.getMessage(), uuid);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -278,7 +283,7 @@ public class UserService {
                     .block();
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            e.printStackTrace();
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, e.getMessage(), uuid);
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
