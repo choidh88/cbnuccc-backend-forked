@@ -103,6 +103,7 @@ public class MissionService {
         mission.setStartTerm(missionDto.getStartTerm());
         mission.setEndTerm(missionDto.getEndTerm());
         mission.setSeason(missionDto.getSeason());
+        mission.setImageCount((short) 0);
 
         try {
             // save it.
