@@ -24,11 +24,12 @@ public class LoginService {
     }
 
     // create a jwt token.
-    public String createToken(Authentication auth, String email) {
+    public String createToken(Authentication auth, String email, boolean rememberMe) {
         MyUser user = userJpaRepository.findByEmail(email).get();
 
         // 1000 ms/s * 60 s/min * 60 min/h * 24 h/d * 7 d = 604800000 ms/d (7 days)
-        int expirationMillis = 604800000;
+        // 1000 ms/s * 60 s/min * 60 min/h * 24 h/d * 1 d = 86400000 ms/d (1 day)
+        int expirationMillis = rememberMe ? 604800000 : 86400000;
         String jwt = Jwts.builder()
                 .claim("uuid", user.getUuid())
                 .claim("name", user.getName())
