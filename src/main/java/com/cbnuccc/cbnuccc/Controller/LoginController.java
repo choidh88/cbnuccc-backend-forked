@@ -19,13 +19,9 @@ import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
 import lombok.RequiredArgsConstructor;
-// import lombok.extern.slf4j.Slf4j;
-
-// import static net.logstash.logback.argument.StructuredArguments.*;
 
 @RestController
 @RequiredArgsConstructor
-// @Slf4j
 public class LoginController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final LoginService loginService;
