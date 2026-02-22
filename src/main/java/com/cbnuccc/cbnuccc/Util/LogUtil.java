@@ -12,7 +12,7 @@ public class LogUtil {
     public static StructuredArgument makeUuidStringKV(UUID uuid) {
         String uuidString = "(Anonymous)";
         if (uuid != null)
-            uuidString = uuid.toString().substring(0, 8) + "-...";
+            uuidString = uuid.toString().substring(0, 8);
         return kv("uuid", uuidString);
     }
 
