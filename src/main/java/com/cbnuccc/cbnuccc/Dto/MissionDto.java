@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -24,6 +25,9 @@ public class MissionDto {
     private LocalDate endTerm;
 
     private String season;
+
+    @Nullable
+    private String testimony;
 
     private Short imageCount;
 }

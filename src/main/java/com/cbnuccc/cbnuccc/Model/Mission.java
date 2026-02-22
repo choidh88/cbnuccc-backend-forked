@@ -3,6 +3,7 @@ package com.cbnuccc.cbnuccc.Model;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
+import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -37,6 +38,9 @@ public class Mission {
     private LocalDate endTerm;
 
     private String season;
+
+    @Nullable
+    private String testimony;
 
     private Short imageCount;
 }

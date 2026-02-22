@@ -42,6 +42,7 @@ public class MissionService {
                 mission.getStartTerm(),
                 mission.getEndTerm(),
                 mission.getSeason(),
+                mission.getTestimony(),
                 mission.getImageCount());
     }
 
@@ -103,6 +104,7 @@ public class MissionService {
         mission.setStartTerm(missionDto.getStartTerm());
         mission.setEndTerm(missionDto.getEndTerm());
         mission.setSeason(missionDto.getSeason());
+        mission.setTestimony(missionDto.getTestimony());
         mission.setImageCount((short) 0);
 
         try {
@@ -133,6 +135,8 @@ public class MissionService {
             mission.setEndTerm(missionDto.getEndTerm());
         if (missionDto.getSeason() != null)
             mission.setSeason(missionDto.getSeason());
+        if (missionDto.getTestimony() != null)
+            mission.setTestimony(missionDto.getTestimony());
 
         try {
             missionJpaRepository.save(mission);
