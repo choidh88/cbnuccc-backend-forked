@@ -20,35 +20,52 @@ public class VerificationController {
 
     @PostMapping("/verification")
     public ResponseEntity<?> sendEmailToVerify(@RequestBody Map<String, String> body) {
-        if (!body.containsKey("email"))
-            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntityAndPrintLog(LogHeader.SEND_REGISTRATION_EMAIL,
-                    null);
+        // check args
+        if (!body.containsKey("email")) {
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL,
+                    LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
+            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
+        }
 
         String email = body.get("email");
         final String code = verificationService.makeCode();
 
-        StatusCode err = verificationService.saveEmailVerification(email, code);
-        if (err.checkIsError())
-            return err.makeErrorResponseEntityAndPrintLog(LogHeader.SEND_REGISTRATION_EMAIL, null);
+        // save data to verification table
+        StatusCode errCode = verificationService.saveEmailVerification(email, code);
+        if (errCode.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, LogUtil.makeStatusCodeMessageKV(errCode));
+            return errCode.makeErrorResponseEntity();
+        }
 
-        err = verificationService.sendMailCode(email, code);
-        if (err.checkIsError())
-            return err.makeErrorResponseEntityAndPrintLog(LogHeader.SEND_REGISTRATION_EMAIL, null);
+        // send mail with code
+        errCode = verificationService.sendMailCode(email, code);
+        if (errCode.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, LogUtil.makeStatusCodeMessageKV(errCode));
+            return errCode.makeErrorResponseEntity();
+        }
 
-        LogUtil.printBasicInfoLog(LogHeader.SEND_REGISTRATION_EMAIL, "successfully sent a email to verify", null);
+        LogUtil.printBasicInfoLog(LogHeader.SEND_REGISTRATION_EMAIL, (Object[]) null);
         return StatusCode.NO_ERROR.makeErrorResponseEntity();
     }
 
     @PostMapping("/verification/confirmation")
     public ResponseEntity<?> verifyCode(@RequestBody Map<String, String> body) {
-        if (!(body.containsKey("email") && body.containsKey("code")))
-            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntityAndPrintLog(LogHeader.CONFIRM_REGISTRATION_CODE,
-                    null);
+        // check args
+        if (!(body.containsKey("email") && body.containsKey("code"))) {
+            LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE,
+                    LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
+            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
+        }
 
         String email = body.get("email");
         String code = body.get("code");
 
-        LogUtil.printBasicInfoLog(LogHeader.CONFIRM_REGISTRATION_CODE, "successfully verified a email", null);
-        return verificationService.verifyCode(email, code).makeErrorResponseEntity();
+        // print log and return
+        StatusCode errCode = verificationService.verifyCode(email, code);
+        if (errCode.checkIsError())
+            LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, LogUtil.makeStatusCodeMessageKV(errCode));
+        else
+            LogUtil.printBasicInfoLog(LogHeader.CONFIRM_REGISTRATION_CODE, (Object[]) null);
+        return errCode.makeErrorResponseEntity();
     }
 }

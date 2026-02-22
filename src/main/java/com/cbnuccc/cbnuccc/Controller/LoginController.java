@@ -30,8 +30,10 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<?> loginJWT(@RequestBody Map<String, String> data) {
         // check enough body
-        if (!(data.containsKey("email") && data.containsKey("password")))
-            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntityAndPrintLog(LogHeader.LOGIN, null);
+        if (!(data.containsKey("email") && data.containsKey("password"))) {
+            LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
+            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
+        }
 
         // set variables of auth information.
         String email = data.get("email");
@@ -48,7 +50,7 @@ public class LoginController {
 
         // get uuid from created token and print log
         UUID uuid = UUID.fromString(securityUtil.extractToken(token).get("uuid").toString());
-        LogUtil.printBasicInfoLog(LogHeader.LOGIN, "successfully logged-in", uuid);
+        LogUtil.printBasicInfoLog(LogHeader.LOGIN, LogUtil.makeUuidStringKV(uuid));
 
         return ResponseEntity.ok(tokenDto);
     }

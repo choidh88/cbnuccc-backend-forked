@@ -43,8 +43,7 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<List<LimitedUserDto>> getUser(@ModelAttribute LimitedUserDto userDto) {
         List<LimitedUserDto> dtos = userService.findAllLimitedUserDtosByLimitedUserDto(userDto);
-        String log = String.format("successfully got %d users", dtos.size());
-        LogUtil.printBasicInfoLog(LogHeader.GET_USER, log, null);
+        LogUtil.printBasicInfoLog(LogHeader.GET_USER, LogUtil.makeCountKV(dtos.size()));
         return ResponseEntity.ok(dtos);
     }
 
@@ -55,8 +54,10 @@ public class UserController {
         user.setUuid(uuid);
 
         List<LimitedUserDto> resultBody = (List<LimitedUserDto>) getUser(user).getBody();
-        if (resultBody.size() == 0)
-            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(LogHeader.GET_USER, uuid);
+        if (resultBody.size() == 0) {
+            LogUtil.printBasicWarnLog(LogHeader.GET_USER, LogUtil.makeStatusCodeMessageKV(StatusCode.NO_USER_FOUND));
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntity();
+        }
 
         LogUtil.printBasicInfoLog(LogHeader.GET_USER, "successfully got a user", uuid);
         LimitedUserDto result = resultBody.get(0);
@@ -68,27 +69,35 @@ public class UserController {
     public ResponseEntity<?> getMyUserData(Authentication authentication) {
         UUID uuid = userService.getUuidFromAuth(authentication);
         Optional<UserDto> _me = userService.findUserDtoByUuid(uuid);
-        if (_me.isEmpty())
-            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(LogHeader.GET_USER, uuid);
+        if (_me.isEmpty()) {
+            LogUtil.printBasicWarnLog(LogHeader.GET_USER, LogUtil.makeStatusCodeMessageKV(StatusCode.NO_USER_FOUND));
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntity();
+        }
         UserDto me = _me.get();
-        LogUtil.printBasicInfoLog(LogHeader.GET_USER, "successfully got my data", uuid);
+
+        LogUtil.printBasicInfoLog(LogHeader.GET_USER, (Object[]) null);
         return ResponseEntity.ok(me);
     }
 
     // check email duplication
     @GetMapping("/email-duplication")
     public ResponseEntity<?> checkEmailDuplication(@RequestBody Map<String, String> body) {
-        if (!body.containsKey("email"))
-            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntityAndPrintLog(
-                    LogHeader.CHECK_EMAIL_DUPLICATION, null);
+        if (!body.containsKey("email")) {
+            LogUtil.printBasicWarnLog(LogHeader.CHECK_EMAIL_DUPLICATION,
+                    LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
+            return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
+        }
         String email = body.get("email");
 
         Optional<UserDto> _user = userService.findUserDtoByEmail(email);
-        if (_user.isPresent())
-            return StatusCode.DUPLICATED_EMAIL.makeErrorResponseEntityAndPrintLog(LogHeader.CHECK_EMAIL_DUPLICATION,
-                    null);
-        return StatusCode.NOT_DUPLICATED_EMAIL.makeErrorResponseEntityAndPrintLog(LogHeader.CHECK_EMAIL_DUPLICATION,
-                null);
+        if (_user.isPresent()) {
+            LogUtil.printBasicWarnLog(LogHeader.CHECK_EMAIL_DUPLICATION, LogUtil.makeStatusCodeMessageKV(
+                    StatusCode.DUPLICATED_EMAIL));
+            return StatusCode.DUPLICATED_EMAIL.makeErrorResponseEntity();
+        }
+
+        LogUtil.printBasicInfoLog(LogHeader.CHECK_EMAIL_DUPLICATION, (Object[]) null);
+        return StatusCode.NOT_DUPLICATED_EMAIL.makeErrorResponseEntity();
     }
 
     // create user, but the user's email should not be same with other's email.
@@ -96,9 +105,12 @@ public class UserController {
     public ResponseEntity<?> createUser(@RequestBody MyUser user) {
         DataWithStatusCode<LimitedUserDto> result = userService.createUser(user);
         StatusCode code = result.code();
-        if (code.checkIsError())
-            return code.makeErrorResponseEntityAndPrintLog(LogHeader.CREATE_USER, null);
-        LogUtil.printBasicInfoLog(LogHeader.CREATE_USER, "successfully created a user", null);
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.CREATE_USER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
+
+        LogUtil.printBasicInfoLog(LogHeader.CREATE_USER, (Object[]) null);
         return ResponseEntity.ok(result.data());
     }
 
@@ -106,11 +118,13 @@ public class UserController {
     @PatchMapping("/user")
     public ResponseEntity<?> updateUser(Authentication authentication, @RequestBody MyUser user) {
         UUID uuid = userService.getUuidFromAuth(authentication);
-        StatusCode resultCode = userService.updateUserByUuid(uuid, user);
-        if (resultCode.checkIsError())
-            return resultCode.makeErrorResponseEntityAndPrintLog(LogHeader.UPDATE_USER, uuid);
+        StatusCode code = userService.updateUserByUuid(uuid, user);
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.UPDATE_USER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
 
-        LogUtil.printBasicInfoLog(LogHeader.UPDATE_USER, "successfully updated a user", uuid);
+        LogUtil.printBasicInfoLog(LogHeader.UPDATE_USER, (Object[]) null);
         return getMyUserData(authentication);
     }
 
@@ -120,12 +134,14 @@ public class UserController {
         UUID uuid = userService.getUuidFromAuth(authentication);
         ResponseEntity<?> _deletedUser = getMyUserData(authentication);
 
-        StatusCode resultCode = userService.deleteUserByUuid(uuid);
-        if (resultCode.checkIsError() || _deletedUser.getStatusCode() != HttpStatus.OK)
-            return resultCode.makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_USER, uuid);
+        StatusCode code = userService.deleteUserByUuid(uuid);
+        if (code.checkIsError() || _deletedUser.getStatusCode() != HttpStatus.OK) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_USER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
 
         UserDto deletedUser = (UserDto) _deletedUser.getBody();
-        LogUtil.printBasicInfoLog(LogHeader.DELETE_USER, "successfully deleted a user", uuid);
+        LogUtil.printBasicInfoLog(LogHeader.DELETE_USER, (Object[]) null);
         return ResponseEntity.ok(deletedUser);
     }
 
@@ -136,14 +152,23 @@ public class UserController {
         UUID uuid = userService.getUuidFromAuth(authentication);
         Optional<UserDto> _user = userService.findUserDtoByUuid(uuid);
 
-        if (_user.isEmpty())
-            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(LogHeader.UPLOAD_PROFILE_IMAGE, uuid);
-        if (file.isEmpty())
-            return StatusCode.EMPTY_GIVEN_IMAGE.makeErrorResponseEntityAndPrintLog(LogHeader.UPLOAD_PROFILE_IMAGE,
-                    uuid);
+        if (_user.isEmpty()) {
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE,
+                    LogUtil.makeStatusCodeMessageKV(StatusCode.NO_USER_FOUND));
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntity();
+        }
+        if (file.isEmpty()) {
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, LogUtil.makeStatusCodeMessageKV(
+                    StatusCode.EMPTY_GIVEN_IMAGE));
+            return StatusCode.EMPTY_GIVEN_IMAGE.makeErrorResponseEntity();
+        }
 
-        return userService.uploadProfileImage(file, uuid)
-                .makeErrorResponseEntityAndPrintLog(LogHeader.UPLOAD_PROFILE_IMAGE, uuid);
+        StatusCode code = userService.uploadProfileImage(file, uuid);
+        if (code.checkIsError())
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, LogUtil.makeStatusCodeMessageKV(code));
+        else
+            LogUtil.printBasicInfoLog(LogHeader.UPLOAD_PROFILE_IMAGE, (Object[]) null);
+        return code.makeErrorResponseEntity();
     }
 
     // delete given user's profile image by uuid
@@ -151,10 +176,17 @@ public class UserController {
     public ResponseEntity<?> deleteProfileImage(Authentication authentication) {
         UUID uuid = userService.getUuidFromAuth(authentication);
         Optional<UserDto> _user = userService.findUserDtoByUuid(uuid);
-        if (_user.isEmpty())
-            return StatusCode.NO_USER_FOUND.makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PROFILE_IMAGE, uuid);
+        if (_user.isEmpty()) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE,
+                    LogUtil.makeStatusCodeMessageKV(StatusCode.NO_USER_FOUND));
+            return StatusCode.NO_USER_FOUND.makeErrorResponseEntity();
+        }
 
-        return userService.deleteProfileImage(uuid).makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PROFILE_IMAGE,
-                uuid);
+        StatusCode code = userService.deleteProfileImage(uuid);
+        if (code.checkIsError())
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, LogUtil.makeStatusCodeMessageKV(code));
+        else
+            LogUtil.printBasicInfoLog(LogHeader.DELETE_PROFILE_IMAGE, (Object[]) null);
+        return code.makeErrorResponseEntity();
     }
 }

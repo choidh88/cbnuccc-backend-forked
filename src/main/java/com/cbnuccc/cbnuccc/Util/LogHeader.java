@@ -24,7 +24,8 @@ public enum LogHeader {
     UPDATE_MISSION,
     DELETE_MISSION,
     UPLOAD_MISSION_IMAGE,
-    DELETE_MISSION_IMAGE;
+    DELETE_MISSION_IMAGE,
+    COMPRESS_IMAGE;
 
     @Getter
     private final String header;

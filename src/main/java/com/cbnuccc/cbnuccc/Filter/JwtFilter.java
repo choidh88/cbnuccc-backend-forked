@@ -3,7 +3,6 @@ package com.cbnuccc.cbnuccc.Filter;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +18,7 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.cbnuccc.cbnuccc.Util.ExcludePath;
+import com.cbnuccc.cbnuccc.Util.LogHeader;
 import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
@@ -63,17 +63,17 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String requestUri = request.getRequestURI();
-        HttpMethod requestMethod = HttpMethod.valueOf(request.getMethod());
+        String method = request.getMethod();
+        HttpMethod requestMethod = HttpMethod.valueOf(method);
+
+        // for log
+        MDC.put("endpoint", requestUri);
+        MDC.put("method", method);
 
         boolean result = EXCLUDE_LIST.stream()
                 .anyMatch(exclude -> exclude.method() == requestMethod &&
                         matcher.match(exclude.uriPattern(), requestUri));
-
-        if (result) {
-            LogUtil.printEnteringLog(requestMethod, requestUri, null);
-            return true;
-        }
-        return false;
+        return result;
     }
 
     // filter
@@ -103,14 +103,8 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // print a entering log
-        LogUtil.printEnteringLog(
-                HttpMethod.valueOf(request.getMethod()),
-                request.getRequestURI(),
-                UUID.fromString((String) claim.get("uuid")));
-
-        MDC.put("user_uuid", claim.get("uuid").toString());
-        MDC.put("endpoint", request.getRequestURI());
-        MDC.put("method", request.getMethod());
+        MDC.put("entered_user_uuid", claim.get("uuid").toString());
+        LogUtil.printBasicInfoLog(LogHeader.ENTER, (Object[]) null);
 
         // final setting to login.
         List<SimpleGrantedAuthority> roles = List.of(new SimpleGrantedAuthority("ROLE_" + claim.get("rank")));

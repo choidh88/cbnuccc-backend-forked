@@ -34,10 +34,7 @@ public class PrayerController {
     public ResponseEntity<?> getPrayers() {
         List<PrayerDto> result = prayerService.getAllNotAnonymousPrayers();
 
-        // print log
-        String message = String.format("successfully got %d all user's prayers.", result.size());
-        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, message, null);
-
+        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, (Object[]) null);
         return ResponseEntity.ok(result);
     }
 
@@ -45,13 +42,13 @@ public class PrayerController {
     @GetMapping("/prayer/{id}")
     public ResponseEntity<?> getPrayersById(@PathVariable("id") int id) {
         DataWithStatusCode<PrayerDto> result = prayerService.getNotAnonymousSpecificPrayer(id);
-        if (result.code().checkIsError())
-            return result.code().makeErrorResponseEntityAndPrintLog(LogHeader.GET_PRAYER, null);
+        StatusCode code = result.code();
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.GET_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
 
-        // print log
-        String message = String.format("successfully got specific prayer #%d.", id);
-        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, message, null);
-
+        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, (Object[]) null);
         return ResponseEntity.ok(result.data());
     }
 
@@ -61,9 +58,7 @@ public class PrayerController {
         UUID uuid = userService.getUuidFromAuth(authentication);
         List<PrayerDto> result = prayerService.getAllPrayersByUuid(uuid);
 
-        // print log
-        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, "successfully got my prayers.", uuid);
-
+        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, (Object) null);
         return ResponseEntity.ok(result);
     }
 
@@ -72,13 +67,13 @@ public class PrayerController {
     public ResponseEntity<?> getMyPrayerById(Authentication authentication, @PathVariable("id") int id) {
         UUID uuid = userService.getUuidFromAuth(authentication);
         DataWithStatusCode<PrayerDto> result = prayerService.getPrayerById(id, uuid);
-        if (result.code().checkIsError()) // check error
-            return result.code().makeErrorResponseEntityAndPrintLog(LogHeader.GET_PRAYER, uuid);
+        StatusCode code = result.code();
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.GET_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
 
-        // print log
-        String message = String.format("successfully got my specific prayer #%d.", id);
-        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, message, uuid);
-
+        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER, (Object[]) null);
         return ResponseEntity.ok(result.data());
     }
 
@@ -87,12 +82,13 @@ public class PrayerController {
     public ResponseEntity<?> createPrayer(Authentication authentication, @RequestBody PrayerDto prayerDto) {
         UUID uuid = userService.getUuidFromAuth(authentication);
         DataWithStatusCode<PrayerDto> result = prayerService.createPrayer(prayerDto, uuid);
-        if (result.code().checkIsError())
-            result.code().makeErrorResponseEntityAndPrintLog(LogHeader.CREATE_PRAYER, uuid);
+        StatusCode code = result.code();
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.CREATE_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            code.makeErrorResponseEntity();
+        }
 
-        // print log
-        LogUtil.printBasicInfoLog(LogHeader.CREATE_PRAYER, "successfully create a prayer", uuid);
-
+        LogUtil.printBasicInfoLog(LogHeader.CREATE_PRAYER, (Object[]) null);
         return ResponseEntity.ok(result.data());
     }
 
@@ -103,14 +99,13 @@ public class PrayerController {
             @PathVariable("id") int id,
             @RequestBody PrayerDto prayerDto) {
         UUID uuid = userService.getUuidFromAuth(authentication);
-        StatusCode result = prayerService.updatePrayer(id, uuid, prayerDto);
-        if (result.checkIsError())
-            return result.makeErrorResponseEntityAndPrintLog(LogHeader.UPDATE_PRAYER, uuid);
+        StatusCode code = prayerService.updatePrayer(id, uuid, prayerDto);
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.UPDATE_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
 
-        // print log
-        String message = String.format("successfully update a prayer #%d", id);
-        LogUtil.printBasicInfoLog(LogHeader.UPDATE_PRAYER, message, uuid);
-
+        LogUtil.printBasicInfoLog(LogHeader.UPDATE_PRAYER, (Object[]) null);
         return getMyPrayerById(authentication, id);
     }
 
@@ -124,19 +119,21 @@ public class PrayerController {
 
         // get being deleted data
         DataWithStatusCode<PrayerDto> _deletedPrayer = prayerService.getPrayerById(id, uuid);
-        if (_deletedPrayer.code().checkIsError())
-            return _deletedPrayer.code().makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PRAYER, uuid);
+        StatusCode code = _deletedPrayer.code();
+        if (code.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            return code.makeErrorResponseEntity();
+        }
         PrayerDto deletedPrayer = _deletedPrayer.data();
 
         // delete data
         StatusCode result = prayerService.deletePrayer(id, uuid);
-        if (result.checkIsError())
-            return result.makeErrorResponseEntityAndPrintLog(LogHeader.DELETE_PRAYER, uuid);
+        if (result.checkIsError()) {
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PRAYER, LogUtil.makeStatusCodeMessageKV(code));
+            return result.makeErrorResponseEntity();
+        }
 
-        // print log
-        String message = String.format("successfully delete a prayer #%d", id);
-        LogUtil.printBasicInfoLog(LogHeader.DELETE_PRAYER, message, uuid);
-
+        LogUtil.printBasicInfoLog(LogHeader.DELETE_PRAYER, (Object[]) null);
         return ResponseEntity.ok(deletedPrayer);
     }
 }

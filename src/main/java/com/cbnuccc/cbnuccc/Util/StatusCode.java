@@ -1,7 +1,6 @@
 package com.cbnuccc.cbnuccc.Util;
 
 import java.util.Map;
-import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -46,20 +45,6 @@ public enum StatusCode {
 
     // make response entity of when returning an error.
     public ResponseEntity<?> makeErrorResponseEntity() {
-        return ResponseEntity.status(responseStatus).body(Map.of(
-                "errorCode", errorCode,
-                "message", errorMessage));
-    }
-
-    // make response entity of when returning an error with a error log.
-    public ResponseEntity<?> makeErrorResponseEntityAndPrintLog(LogHeader header, UUID uuid) {
-        if (this.checkIsError())
-            LogUtil.printErrorLog(header, this, uuid);
-        else
-            LogUtil.printBasicInfoLog(header,
-                    String.format("%s - %s", responseStatus.toString(), errorMessage),
-                    uuid);
-
         return ResponseEntity.status(responseStatus).body(Map.of(
                 "errorCode", errorCode,
                 "message", errorMessage));
