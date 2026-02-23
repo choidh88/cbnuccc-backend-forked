@@ -28,7 +28,7 @@ public class ImageUtil {
             Thumbnails.of(originalImage)
                     .size(originalImage.getWidth(), originalImage.getHeight())
                     .outputFormat("jpg")
-                    .outputQuality(0.65)
+                    .outputQuality(0.7)
                     .toOutputStream(os);
         } catch (IOException e) {
             LogUtil.printBasicWarnLog(LogHeader.COMPRESS_IMAGE, LogUtil.makeExceptionKV(e));
