@@ -57,6 +57,8 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean result = SecurityUtil.EXCLUDE_LIST.stream()
                 .anyMatch(exclude -> exclude.method() == requestMethod &&
                         matcher.match(exclude.uriPattern(), requestUri));
+        if (result)
+            LogUtil.printBasicInfoLog(LogHeader.ENTER, (Object[]) null);
         return result;
     }
 
