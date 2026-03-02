@@ -45,7 +45,10 @@ public class UserController {
     @GetMapping("/user")
     public ResponseEntity<Object> getUser(@ModelAttribute LimitedUserDto userDto, Pageable pageable) {
         Page<LimitedUserDto> dtos = userService.findAllLimitedUserDtosByLimitedUserDto(userDto, pageable);
-        LogUtil.printBasicInfoLog(LogHeader.GET_USER, LogUtil.makeCountKV(dtos.getSize()));
+        LogUtil.printBasicInfoLog(LogHeader.GET_USER,
+                LogUtil.makeCountKV(dtos.getSize()),
+                LogUtil.makePageNumberKV(pageable),
+                LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(dtos));
     }
 

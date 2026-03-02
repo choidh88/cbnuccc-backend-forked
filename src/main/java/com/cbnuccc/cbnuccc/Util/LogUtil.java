@@ -2,6 +2,8 @@ package com.cbnuccc.cbnuccc.Util;
 
 import java.util.UUID;
 
+import org.springframework.data.domain.Pageable;
+
 import static net.logstash.logback.argument.StructuredArguments.kv;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +32,14 @@ public class LogUtil {
 
     public static StructuredArgument makeIdKV(int id) {
         return kv("id", id);
+    }
+
+    public static StructuredArgument makePageSizeKV(Pageable pageable) {
+        return kv("size", pageable.getPageSize());
+    }
+
+    public static StructuredArgument makePageNumberKV(Pageable pageable) {
+        return kv("page", pageable.getPageNumber());
     }
 
     public static StructuredArgument makeEmailKV(String email) {
