@@ -46,7 +46,7 @@ public class UserController {
     public ResponseEntity<Object> getUser(@ModelAttribute LimitedUserDto userDto, Pageable pageable) {
         Page<LimitedUserDto> dtos = userService.findAllLimitedUserDtosByLimitedUserDto(userDto, pageable);
         LogUtil.printBasicInfoLog(LogHeader.GET_USER,
-                LogUtil.makeCountKV(dtos.getSize()),
+                LogUtil.makeCountKV(dtos.getNumberOfElements()),
                 LogUtil.makePageNumberKV(pageable),
                 LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(dtos));
@@ -64,7 +64,7 @@ public class UserController {
             return StatusCode.NO_USER_FOUND.makeErrorResponseEntity();
         }
 
-        LogUtil.printBasicInfoLog(LogHeader.GET_USER, LogUtil.makeCountKV(resultBody.getSize()));
+        LogUtil.printBasicInfoLog(LogHeader.GET_USER, LogUtil.makeCountKV(resultBody.getNumberOfElements()));
         LimitedUserDto result = resultBody.toList().get(0);
         return ResponseEntity.ok(result);
     }

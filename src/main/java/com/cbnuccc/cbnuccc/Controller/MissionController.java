@@ -43,7 +43,7 @@ public class MissionController {
         Page<MissionDto> result = missionService.getAllMissions(pageable);
 
         LogUtil.printBasicInfoLog(LogHeader.GET_MISSION,
-                LogUtil.makeCountKV(result.getSize()),
+                LogUtil.makeCountKV(result.getNumberOfElements()),
                 LogUtil.makePageNumberKV(pageable),
                 LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(result));
@@ -70,7 +70,7 @@ public class MissionController {
         Page<MissionDto> missions = missionService.getAllMyMissions(uuid, pageable);
 
         LogUtil.printBasicInfoLog(LogHeader.GET_MISSION,
-                LogUtil.makeCountKV(missions.getSize()),
+                LogUtil.makeCountKV(missions.getNumberOfElements()),
                 LogUtil.makePageNumberKV(pageable),
                 LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(missions));

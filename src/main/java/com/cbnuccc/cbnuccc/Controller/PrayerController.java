@@ -38,7 +38,7 @@ public class PrayerController {
         Page<PrayerDto> result = prayerService.getAllNotAnonymousPrayers(pageable);
 
         LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER,
-                LogUtil.makeCountKV(result.getSize()),
+                LogUtil.makeCountKV(result.getNumberOfElements()),
                 LogUtil.makePageNumberKV(pageable),
                 LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(result));
@@ -65,7 +65,7 @@ public class PrayerController {
         Page<PrayerDto> result = prayerService.getAllPrayersByUuid(uuid, pageable);
 
         LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER,
-                LogUtil.makeCountKV(result.getSize()),
+                LogUtil.makeCountKV(result.getNumberOfElements()),
                 LogUtil.makePageNumberKV(pageable),
                 LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(result));
