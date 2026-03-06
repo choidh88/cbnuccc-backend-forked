@@ -5,10 +5,10 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@ConfigurationProperties(prefix = "supabase")
+@ConfigurationProperties(prefix = "mailgun")
 @RequiredArgsConstructor
 @Getter
-public class SupabaseProperties {
-    private final String url;
+public class MailgunProperties {
     private final String key;
+    private final String domain;
 }

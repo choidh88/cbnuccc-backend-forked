@@ -25,12 +25,6 @@ public class SecurityUtil {
     @Getter
     private final SecretKey jwtKey;
 
-    @Getter
-    private final String mailgunKey;
-
-    @Getter
-    private final String mailgunDomain;
-
     // list of methods and uris which does not need to get filtered.
     public static final List<ExcludePath> EXCLUDE_LIST = List.of(
             new ExcludePath(HttpMethod.GET, "/email-duplication"),
@@ -41,13 +35,9 @@ public class SecurityUtil {
 
     public SecurityUtil(
             @Value("${pepper}") String pepper,
-            @Value("${jwtkey}") String jwtKey,
-            @Value("${mailgun.key}") String mailgunKey,
-            @Value("${mailgun.domain}") String mailgunDomain) {
+            @Value("${jwtkey}") String jwtKey) {
         this.pepper = pepper;
         this.jwtKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtKey));
-        this.mailgunKey = mailgunKey;
-        this.mailgunDomain = mailgunDomain;
     }
 
     // return a password with pepper.

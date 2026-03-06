@@ -9,6 +9,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.cbnuccc.cbnuccc.Config.MailgunProperties;
 import com.cbnuccc.cbnuccc.Model.Verification;
 import com.cbnuccc.cbnuccc.Repository.VerificationJpaRepository;
 import com.cbnuccc.cbnuccc.Util.LogHeader;
@@ -31,6 +32,7 @@ public class VerificationService {
     private final VerificationJpaRepository verificationJpaRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityUtil securityUtil;
+    private final MailgunProperties mailgunProperties;
 
     // if the request is expired, it returns true.
     // otherwise, it returns false.
@@ -70,8 +72,8 @@ public class VerificationService {
         String messageHeader = "안녕하세요!\n충북대학교 CCC입니다.\n아래와 같이 인증 코드를 알려드립니다.";
         String messageCode = "인증 코드: " + code;
         String messageFooter = "위 코드를 아무에게도 공개하지 마세요!\n감사합니다.";
-        final String apiKey = securityUtil.getMailgunKey();
-        final String senderDomain = securityUtil.getMailgunDomain();
+        final String apiKey = mailgunProperties.getKey();
+        final String senderDomain = mailgunProperties.getDomain();
         try {
             HttpResponse<JsonNode> request = Unirest
                     .post("https://api.mailgun.net/v3/" + senderDomain + "/messages")
