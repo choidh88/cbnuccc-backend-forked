@@ -195,7 +195,7 @@ public class MissionService {
                         .bodyToMono(String.class)
                         .block();
             } catch (Exception e) {
-                // TODO: if something went wrong, delete all files.
+                deleteAllMissionImages(id, uuid);
                 LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, e.getMessage(), uuid);
                 return StatusCode.SOMETHING_WENT_WRONG;
             }
