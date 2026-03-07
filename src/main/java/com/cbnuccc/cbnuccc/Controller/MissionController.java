@@ -132,6 +132,13 @@ public class MissionController {
         return ResponseEntity.ok(deletedMission);
     }
 
+    // get all mission author's uuid
+    @GetMapping("/mission/author")
+    public ResponseEntity<?> getAllAuthorUuid(Pageable pageable) {
+        Page<UUID> uuids = missionService.getAllAuthorUuid(pageable);
+        return ResponseEntity.ok(PaginationUtil.makePaginationMap(uuids));
+    }
+
     // upload mission's images
     @PostMapping("/mission-image/{id}")
     public ResponseEntity<?> uploadMissionImage(Authentication authentication,

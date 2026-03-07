@@ -145,4 +145,11 @@ public class PrayerController {
         LogUtil.printBasicInfoLog(LogHeader.DELETE_PRAYER, LogUtil.makeIdKV(id));
         return ResponseEntity.ok(deletedPrayer);
     }
+
+    // get all prayer author's uuid
+    @GetMapping("/prayer/author")
+    public ResponseEntity<?> getAllAuthorUuid(Pageable pageable) {
+        Page<UUID> uuids = prayerService.getAllAuthorUuid(pageable);
+        return ResponseEntity.ok(PaginationUtil.makePaginationMap(uuids));
+    }
 }

@@ -28,4 +28,12 @@ public interface MissionJpaRepository extends JpaRepository<Mission, Integer> {
 
     // get mission count by uuid
     int countByAuthorUuid(UUID uuid);
+
+    // get all user's uuid who created a mission.
+    @Query("""
+                select distinct u.uuid
+                from Mission m
+                join m.author u
+            """)
+    Page<UUID> findAuthorUuid(Pageable pageable);
 }

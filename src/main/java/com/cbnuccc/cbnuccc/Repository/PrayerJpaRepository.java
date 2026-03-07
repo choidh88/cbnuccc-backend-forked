@@ -35,4 +35,12 @@ public interface PrayerJpaRepository extends JpaRepository<Prayer, Integer> {
 
     // get prayer count by uuid
     int countByAuthorUuid(UUID uuid);
+
+    // get all user's uuid who created a mission.
+    @Query("""
+                select distinct u.uuid
+                from Prayer p
+                join p.author u
+            """)
+    Page<UUID> findAuthorUuid(Pageable pageable);
 }

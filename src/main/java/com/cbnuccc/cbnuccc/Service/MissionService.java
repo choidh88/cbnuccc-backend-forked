@@ -157,6 +157,11 @@ public class MissionService {
         }
     }
 
+    // get all mission author's uuid
+    public Page<UUID> getAllAuthorUuid(Pageable pageable) {
+        return missionJpaRepository.findAuthorUuid(pageable);
+    }
+
     // upload mission images.
     public StatusCode uploadMissionImages(List<MultipartFile> files, int id, UUID uuid) {
         // verify auth information to update #{id} mission board.

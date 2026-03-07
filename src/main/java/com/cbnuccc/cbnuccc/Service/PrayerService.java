@@ -136,4 +136,9 @@ public class PrayerService {
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
+
+    // get all mission author's uuid
+    public Page<UUID> getAllAuthorUuid(Pageable pageable) {
+        return prayerJpaRepository.findAuthorUuid(pageable);
+    }
 }
