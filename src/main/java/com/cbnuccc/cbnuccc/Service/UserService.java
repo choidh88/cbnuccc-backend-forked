@@ -190,7 +190,8 @@ public class UserService {
         MyUser oldUser = _oldUser.get();
         if (user.getId() != null ||
                 user.getUuid() != null ||
-                user.getStudentId() != null)
+                user.getStudentId() != null ||
+                user.getPassword() != null)
             return StatusCode.CONNOT_CHANGE_IMPORTANT_INFORMATION;
 
         // if the field value is not null, change it.
