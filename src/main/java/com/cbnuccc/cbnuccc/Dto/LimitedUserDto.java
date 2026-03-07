@@ -19,6 +19,9 @@ public class LimitedUserDto {
     // It's not on the DB.
     private Integer prayerCount = 0;
 
+    // It's not on the DB.
+    private Integer missionCount = 0;
+
     public LimitedUserDto() {
     }
 }
