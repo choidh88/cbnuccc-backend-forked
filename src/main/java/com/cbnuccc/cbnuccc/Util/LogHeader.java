@@ -25,7 +25,9 @@ public enum LogHeader {
     DELETE_MISSION,
     UPLOAD_MISSION_IMAGE,
     DELETE_MISSION_IMAGE,
-    COMPRESS_IMAGE;
+    COMPRESS_IMAGE,
+    GET_MISSION_AUTHOR,
+    GET_PRAYER_AUTHOR;
 
     @Getter
     private final String header;

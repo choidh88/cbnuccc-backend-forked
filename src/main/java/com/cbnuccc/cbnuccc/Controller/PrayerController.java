@@ -150,6 +150,10 @@ public class PrayerController {
     @GetMapping("/prayer/author")
     public ResponseEntity<?> getAllAuthorUuid(Pageable pageable) {
         Page<UUID> uuids = prayerService.getAllAuthorUuid(pageable);
+        LogUtil.printBasicInfoLog(LogHeader.GET_PRAYER_AUTHOR,
+                LogUtil.makeCountKV(uuids.getNumber()),
+                LogUtil.makePageNumberKV(pageable),
+                LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(uuids));
     }
 }

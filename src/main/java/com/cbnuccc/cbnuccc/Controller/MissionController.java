@@ -136,6 +136,10 @@ public class MissionController {
     @GetMapping("/mission/author")
     public ResponseEntity<?> getAllAuthorUuid(Pageable pageable) {
         Page<UUID> uuids = missionService.getAllAuthorUuid(pageable);
+        LogUtil.printBasicInfoLog(LogHeader.GET_MISSION_AUTHOR,
+                LogUtil.makeCountKV(uuids.getNumber()),
+                LogUtil.makePageNumberKV(pageable),
+                LogUtil.makePageSizeKV(pageable));
         return ResponseEntity.ok(PaginationUtil.makePaginationMap(uuids));
     }
 
