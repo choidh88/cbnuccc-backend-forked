@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,7 +45,13 @@ public class LoginController {
         // create user's token
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 email, pepperedPassword);
-        Authentication auth = authenticationManagerBuilder.getObject().authenticate(authToken);
+        Authentication auth = null;
+        try {
+            auth = authenticationManagerBuilder.getObject().authenticate(authToken);
+        } catch (AuthenticationException e) {
+            // print warn log about failing to login
+            LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeEmailKV(email), LogUtil.makeExceptionKV(e));
+        }
         String token = loginService.createToken(auth, data.get("email"), rememberMe);
         TokenDto tokenDto = new TokenDto(token);
 

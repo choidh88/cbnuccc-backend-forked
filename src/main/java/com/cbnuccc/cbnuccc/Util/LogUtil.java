@@ -43,11 +43,7 @@ public class LogUtil {
     }
 
     public static StructuredArgument makeEmailKV(String email) {
-        if (email.indexOf("@") < 0)
-            return kv("email", "(Wrong email)");
-
-        String result = email.substring(0, email.indexOf("@"));
-        return kv("email", result);
+        return kv("email", email.hashCode());
     }
 
     public static void printBasicInfoLog(LogHeader logHeader, Object... kvs) {
