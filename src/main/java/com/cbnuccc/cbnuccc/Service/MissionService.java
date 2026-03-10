@@ -47,7 +47,7 @@ public class MissionService {
                 mission.getImageCount());
     }
 
-    private void deleteSpecificMissionImage(int id, short imageId) {
+    private void deleteSpecificMissionImage(long id, short imageId) {
         // set file name
         String fileName = String.format("%d-%d", id, imageId);
         String path = "mission/" + fileName;
@@ -69,7 +69,7 @@ public class MissionService {
     }
 
     // get a specific mission.
-    public DataWithStatusCode<MissionDto> getSpecificMission(int id) {
+    public DataWithStatusCode<MissionDto> getSpecificMission(long id) {
         Optional<Mission> _mission = missionJpaRepository.findById(id);
         if (_mission.isEmpty())
             return new DataWithStatusCode<>(StatusCode.NO_MISSION_FOUND, null);
@@ -113,7 +113,7 @@ public class MissionService {
     }
 
     // update a mission.
-    public StatusCode updateMission(int id, UUID uuid, MissionDto missionDto) {
+    public StatusCode updateMission(long id, UUID uuid, MissionDto missionDto) {
         // check existance
         Optional<Mission> _mission = missionJpaRepository.findByIdAndAuthorUuid(id, uuid);
         if (_mission.isEmpty())
@@ -143,7 +143,7 @@ public class MissionService {
     }
 
     // delete a mission.
-    public StatusCode deleteMission(int id, UUID uuid) {
+    public StatusCode deleteMission(long id, UUID uuid) {
         Optional<Mission> _mission = missionJpaRepository.findByIdAndAuthorUuid(id, uuid);
         if (_mission.isEmpty())
             return StatusCode.NO_MISSION_FOUND;
@@ -163,7 +163,7 @@ public class MissionService {
     }
 
     // upload mission images.
-    public StatusCode uploadMissionImages(List<MultipartFile> files, int id, UUID uuid) {
+    public StatusCode uploadMissionImages(List<MultipartFile> files, long id, UUID uuid) {
         // verify auth information to update #{id} mission board.
         Optional<Mission> _mission = missionJpaRepository.findByIdAndAuthorUuid(id, uuid);
         if (_mission.isEmpty())
@@ -215,7 +215,7 @@ public class MissionService {
         return StatusCode.NO_ERROR;
     }
 
-    public StatusCode deleteAllMissionImages(int id, UUID uuid) {
+    public StatusCode deleteAllMissionImages(long id, UUID uuid) {
         // check if #{id} mission is made by user whose uuid is {uuid}
         Optional<Mission> _mission = missionJpaRepository.findByIdAndAuthorUuid(id, uuid);
         if (_mission.isEmpty())

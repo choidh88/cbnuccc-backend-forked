@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.cbnuccc.cbnuccc.Model.Verification;
 
-public interface VerificationJpaRepository extends JpaRepository<Verification, Integer> {
+public interface VerificationJpaRepository extends JpaRepository<Verification, Long> {
     Optional<Verification> findByEmail(String email);
 
     void deleteByExpireAtBeforeAndIsVerifiedFalse(OffsetDateTime time);

@@ -11,11 +11,11 @@ import org.springframework.data.repository.query.Param;
 
 import com.cbnuccc.cbnuccc.Model.Mission;
 
-public interface MissionJpaRepository extends JpaRepository<Mission, Integer> {
+public interface MissionJpaRepository extends JpaRepository<Mission, Long> {
     // find all missions by given uuid.
     Page<Mission> findAllByAuthorUuid(UUID uuid, Pageable pageable);
 
-    Optional<Mission> findByIdAndAuthorUuid(int id, UUID uuid);
+    Optional<Mission> findByIdAndAuthorUuid(Long id, UUID uuid);
 
     // get author's uuid.
     @Query("""

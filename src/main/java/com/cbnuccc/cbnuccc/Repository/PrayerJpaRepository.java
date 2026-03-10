@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.cbnuccc.cbnuccc.Model.Prayer;
 
-public interface PrayerJpaRepository extends JpaRepository<Prayer, Integer> {
+public interface PrayerJpaRepository extends JpaRepository<Prayer, Long> {
     // get not anonymous prayers.
     Page<Prayer> findAllByAnonymousFalse(Pageable pageable);
 
