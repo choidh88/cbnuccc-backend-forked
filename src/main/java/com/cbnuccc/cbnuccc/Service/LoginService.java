@@ -51,7 +51,7 @@ public class LoginService {
         return jwt;
     }
 
-    private boolean checkLoginable(String email, String ip) {
+    public boolean checkLoginable(String email, String ip) {
         Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
         if (_loginRecord.isEmpty())
             return true;

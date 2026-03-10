@@ -42,7 +42,16 @@ public class LoginController {
         String ip = SecurityUtil.getClientIp(request);
         TokenDto tokenDto = loginService.login(email, password, rememberMe, ip);
         if (tokenDto == null) {
-            loginService.recordLoginFailure(email, ip);
+            StatusCode code = loginService.recordLoginFailure(email, ip);
+
+            if (code.checkIsError()) {
+                LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeStatusCodeMessageKV(code));
+                return code.makeErrorResponseEntity();
+            }
+
+            if (!loginService.checkLoginable(email, ip))
+                return StatusCode.ACCOUNT_LOCKED.makeErrorResponseEntity();
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

@@ -26,7 +26,8 @@ public enum StatusCode {
     EMPTY_GIVEN_IMAGE(HttpStatus.NOT_FOUND, "Given image is empty.", 12),
     NO_PRAYER_FOUND(HttpStatus.NOT_FOUND, "Cannot found given prayer.", 13),
     NO_MISSION_FOUND(HttpStatus.NOT_FOUND, "Cannot found given mission.", 14),
-    EXCEED_1MB(HttpStatus.BAD_REQUEST, "Compressed file size cannot exceed 1MB.", 15);
+    EXCEED_1MB(HttpStatus.BAD_REQUEST, "Compressed file size cannot exceed 1MB.", 15),
+    ACCOUNT_LOCKED(HttpStatus.FORBIDDEN, "Given email is not found or the account is locked for 10 minutes.", 16);
 
     @Getter
     private final HttpStatusCode responseStatus;
