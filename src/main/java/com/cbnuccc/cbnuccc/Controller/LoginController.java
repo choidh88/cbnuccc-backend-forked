@@ -3,11 +3,8 @@ package com.cbnuccc.cbnuccc.Controller;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 public class LoginController {
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final LoginService loginService;
     private final SecurityUtil securityUtil;
 
@@ -39,24 +35,15 @@ public class LoginController {
         // set variables of auth information.
         String email = data.get("email");
         String password = data.get("password");
-        String pepperedPassword = securityUtil.addPepper(password);
         boolean rememberMe = Boolean.parseBoolean(data.get("rememberMe")); // default value is false
 
-        // create user's token
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                email, pepperedPassword);
-        Authentication auth = null;
-        try {
-            auth = authenticationManagerBuilder.getObject().authenticate(authToken);
-        } catch (AuthenticationException e) {
-            // print warn log about failing to login
-            LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeEmailKV(email), LogUtil.makeExceptionKV(e));
-        }
-        String token = loginService.createToken(auth, data.get("email"), rememberMe);
-        TokenDto tokenDto = new TokenDto(token);
+        // login
+        TokenDto tokenDto = loginService.login(email, password, rememberMe);
+        if (tokenDto == null)
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
         // get uuid from created token and print log
-        UUID uuid = UUID.fromString(securityUtil.extractToken(token).get("uuid").toString());
+        UUID uuid = UUID.fromString(securityUtil.extractToken(tokenDto.getToken()).get("uuid").toString());
         LogUtil.printBasicInfoLog(LogHeader.LOGIN, LogUtil.makeUuidStringKV(uuid));
 
         return ResponseEntity.ok(tokenDto);
