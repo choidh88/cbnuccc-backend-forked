@@ -16,6 +16,7 @@ import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -25,7 +26,7 @@ public class LoginController {
     private final SecurityUtil securityUtil;
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginJWT(@RequestBody Map<String, String> data) {
+    public ResponseEntity<?> loginJWT(HttpServletRequest request, @RequestBody Map<String, String> data) {
         // check enough body
         if (!(data.containsKey("email") && data.containsKey("password"))) {
             LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
@@ -38,9 +39,12 @@ public class LoginController {
         boolean rememberMe = Boolean.parseBoolean(data.get("rememberMe")); // default value is false
 
         // login
-        TokenDto tokenDto = loginService.login(email, password, rememberMe);
-        if (tokenDto == null)
+        String ip = SecurityUtil.getClientIp(request);
+        TokenDto tokenDto = loginService.login(email, password, rememberMe, ip);
+        if (tokenDto == null) {
+            loginService.recordLoginFailure(email, ip);
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
 
         // get uuid from created token and print log
         UUID uuid = UUID.fromString(securityUtil.extractToken(tokenDto.getToken()).get("uuid").toString());

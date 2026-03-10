@@ -1,6 +1,7 @@
 package com.cbnuccc.cbnuccc.Service;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -9,11 +10,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
 
 import com.cbnuccc.cbnuccc.Dto.TokenDto;
+import com.cbnuccc.cbnuccc.Model.Login;
 import com.cbnuccc.cbnuccc.Model.MyUser;
+import com.cbnuccc.cbnuccc.Repository.LoginJpaRepository;
 import com.cbnuccc.cbnuccc.Repository.UserJpaRepository;
 import com.cbnuccc.cbnuccc.Util.LogHeader;
 import com.cbnuccc.cbnuccc.Util.LogUtil;
+import com.cbnuccc.cbnuccc.Util.OffsetDateTimeUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
+import com.cbnuccc.cbnuccc.Util.StatusCode;
 
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +29,7 @@ public class LoginService {
     private final UserJpaRepository userJpaRepository;
     private final SecurityUtil securityUtil;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final LoginJpaRepository loginJpaRepository;
 
     // create a jwt token.
     private String createToken(Authentication auth, String email, boolean rememberMe) {
@@ -45,8 +51,65 @@ public class LoginService {
         return jwt;
     }
 
+    private boolean checkLoginable(String email, String ip) {
+        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
+        if (_loginRecord.isEmpty())
+            return true;
+        Login loginRecord = _loginRecord.get();
+
+        if (loginRecord.getAttempt() >= 5) {
+            if (!loginRecord.getLastLoginAt().isBefore(OffsetDateTimeUtil.getNow().minusMinutes(10))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public StatusCode recordLoginFailure(String email, String ip) {
+        // find a login record by email and ip to update it or create it.
+        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
+
+        Login loginRecord = new Login();
+        loginRecord.setAttempt((short) 0);
+        loginRecord.setEmail(email);
+        loginRecord.setIp(ip);
+
+        // if id exists, then use it to update.
+        if (_loginRecord.isPresent())
+            loginRecord = _loginRecord.get();
+
+        short attempt = (short) (loginRecord.getAttempt() + 1);
+        // if attempt is (over) 5 and current time is not more 10 minutes
+        // after the last login time, then make the email and ip locked.
+        if (attempt >= 5) {
+            if (loginRecord.getLastLoginAt().isBefore(OffsetDateTimeUtil.getNow().minusMinutes(10))) {
+                attempt = 0;
+            }
+        }
+
+        // set last time of logging in now and attempt
+        loginRecord.setLastLoginAt(OffsetDateTimeUtil.getNow());
+        loginRecord.setAttempt(attempt);
+
+        try {
+            if (attempt == 0)
+                loginJpaRepository.delete(loginRecord);
+            else
+                loginJpaRepository.save(loginRecord);
+        } catch (Exception e) {
+            LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeExceptionKV(e));
+            return StatusCode.SOMETHING_WENT_WRONG;
+        }
+
+        return StatusCode.NO_ERROR;
+    }
+
     // process login
-    public TokenDto login(String email, String password, boolean rememberMe) {
+    public TokenDto login(String email, String password, boolean rememberMe, String ip) {
+        // check the email and the ip
+        if (!checkLoginable(email, ip))
+            return null;
+
         // create user's token
         String pepperedPassword = securityUtil.addPepper(password);
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
