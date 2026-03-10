@@ -25,7 +25,7 @@ public class MyUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         var result = userJpaRepository.findByEmail(email);
         if (result.isEmpty())
-            throw new UsernameNotFoundException("그런 아이디 없음");
+            throw new UsernameNotFoundException("There's no given user.");
 
         var user = result.get();
 
