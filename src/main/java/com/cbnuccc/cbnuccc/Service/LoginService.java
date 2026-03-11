@@ -3,6 +3,8 @@ package com.cbnuccc.cbnuccc.Service;
 import java.util.Date;
 import java.util.Optional;
 
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -21,10 +23,12 @@ import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
 import io.jsonwebtoken.Jwts;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@EnableScheduling
 public class LoginService {
     private final UserJpaRepository userJpaRepository;
     private final SecurityUtil securityUtil;
@@ -51,6 +55,15 @@ public class LoginService {
         return jwt;
     }
 
+    // delete all useless tuples by 10 minutes.
+    // 1000 ms/s * 60 s/min * 10 min = 600000 (10 min)
+    @Scheduled(fixedRate = 1000 * 60 * 10)
+    @Transactional
+    public void deleteAllUselessTupleByLastLoginAt() {
+        loginJpaRepository.deleteByLastLoginAtBefore(OffsetDateTimeUtil.getNow().minusMinutes(10));
+    }
+
+    // check login-able
     public boolean checkLoginable(String email, String ip) {
         Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
         if (_loginRecord.isEmpty())
