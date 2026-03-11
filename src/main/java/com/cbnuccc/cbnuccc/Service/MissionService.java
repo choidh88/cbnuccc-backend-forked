@@ -106,7 +106,7 @@ public class MissionService {
             Mission createdMission = missionJpaRepository.save(mission);
             return new DataWithStatusCode<>(StatusCode.NO_ERROR, missionToMissionDto(createdMission));
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.CREATE_MISSION, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.CREATE_MISSION, LogUtil.makeExceptionKV(e));
             return new DataWithStatusCode<>(StatusCode.SOMETHING_WENT_WRONG, null);
         }
     }
@@ -136,7 +136,7 @@ public class MissionService {
             missionJpaRepository.save(mission);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.UPDATE_MISSION, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.UPDATE_MISSION, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -151,7 +151,7 @@ public class MissionService {
             missionJpaRepository.deleteById(id);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.DELETE_MISSION, e.getMessage(), null);
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_MISSION, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -200,7 +200,7 @@ public class MissionService {
                         .block();
             } catch (Exception e) {
                 deleteAllMissionImages(id, uuid);
-                LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, e.getMessage(), uuid);
+                LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, LogUtil.makeExceptionKV(e));
                 return StatusCode.SOMETHING_WENT_WRONG;
             }
         }
@@ -209,7 +209,7 @@ public class MissionService {
         try {
             missionJpaRepository.save(mission);
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, LogUtil.makeExceptionKV(e));
         }
         return StatusCode.NO_ERROR;
     }
@@ -228,7 +228,7 @@ public class MissionService {
                 // delete it
                 deleteSpecificMissionImage(id, i);
             } catch (Exception e) {
-                LogUtil.printBasicWarnLog(LogHeader.DELETE_MISSION_IMAGE, e.getMessage(), null);
+                LogUtil.printBasicWarnLog(LogHeader.DELETE_MISSION_IMAGE, LogUtil.makeExceptionKV(e));
                 return StatusCode.SOMETHING_WENT_WRONG;
             }
         }
@@ -238,7 +238,7 @@ public class MissionService {
         try {
             missionJpaRepository.save(mission);
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, LogUtil.makeExceptionKV(e));
         }
         return StatusCode.NO_ERROR;
     }

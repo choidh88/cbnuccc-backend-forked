@@ -178,7 +178,7 @@ public class UserService {
             LimitedUserDto createdLimitedUserDto = userDtoToLimitedUserDto(userToUserDto(createdUser));
             return new DataWithStatusCode<LimitedUserDto>(StatusCode.NO_ERROR, createdLimitedUserDto);
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.CREATE_USER, e.getMessage(), null);
+            LogUtil.printBasicWarnLog(LogHeader.CREATE_USER, LogUtil.makeExceptionKV(e));
             return new DataWithStatusCode<>(StatusCode.SOMETHING_WENT_WRONG, null);
         }
     }
@@ -228,7 +228,7 @@ public class UserService {
             userJpaRepository.delete(user);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.DELETE_USER, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_USER, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -260,7 +260,7 @@ public class UserService {
                     .block();
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.UPLOAD_PROFILE_IMAGE, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -282,7 +282,7 @@ public class UserService {
                     .block();
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PROFILE_IMAGE, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }

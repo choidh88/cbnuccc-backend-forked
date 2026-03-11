@@ -114,7 +114,7 @@ public class VerificationService {
             verificationJpaRepository.save(verification);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, e.getMessage(), null);
+            LogUtil.printBasicWarnLog(LogHeader.SEND_REGISTRATION_EMAIL, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -139,7 +139,7 @@ public class VerificationService {
             try {
                 verificationJpaRepository.delete(verification);
             } catch (Exception e) {
-                LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, e.getMessage(), null);
+                LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, LogUtil.makeExceptionKV(e));
                 return StatusCode.SOMETHING_WENT_WRONG;
             }
             return StatusCode.REQUEST_IS_EXPIRED;
@@ -151,7 +151,7 @@ public class VerificationService {
         try {
             verificationJpaRepository.save(verification);
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, e.getMessage(), null);
+            LogUtil.printBasicWarnLog(LogHeader.CONFIRM_REGISTRATION_CODE, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
 

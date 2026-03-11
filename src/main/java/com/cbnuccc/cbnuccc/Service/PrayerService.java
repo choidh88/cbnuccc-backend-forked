@@ -113,7 +113,7 @@ public class PrayerService {
             prayerJpaRepository.save(prayer);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.UPDATE_PRAYER, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.UPDATE_PRAYER, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
@@ -131,7 +131,7 @@ public class PrayerService {
             prayerJpaRepository.delete(prayer);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
-            LogUtil.printBasicWarnLog(LogHeader.DELETE_PRAYER, e.getMessage(), uuid);
+            LogUtil.printBasicWarnLog(LogHeader.DELETE_PRAYER, LogUtil.makeExceptionKV(e));
             return StatusCode.SOMETHING_WENT_WRONG;
         }
     }
