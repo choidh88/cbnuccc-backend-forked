@@ -184,6 +184,8 @@ public class UserService {
             return new DataWithStatusCode<>(StatusCode.INVALID_PASSWORD, null);
         user = encodeUserPassword(user, user.getPassword());
 
+        user.setPasswordChangedAt(OffsetDateTimeUtil.getNow());
+
         try {
             MyUser createdUser = userJpaRepository.save(user);
             verificationJpaRepository.deleteByEmail(email); // delete verified user from verification table.
