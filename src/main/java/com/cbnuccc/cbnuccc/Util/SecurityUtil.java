@@ -77,4 +77,23 @@ public class SecurityUtil {
 
         return ip.split(",")[0];
     }
+
+    // check if given password(plain password) is vaild or not.
+    public boolean checkValidPassword(String password) {
+        // password's length should be 8 to 15.
+        if (!(8 <= password.length() && password.length() <= 15))
+            return false;
+
+        // password should include one or more special characters.
+        String specialChars = "`-=~!@#$%^&*()_+{{}|[]\\;':\",./<>?";
+        if (!password.contains(specialChars))
+            return false;
+
+        // password should include one or more special digits.
+        String numbers = "1234567890";
+        if (!password.contains(numbers))
+            return false;
+
+        return true;
+    }
 }

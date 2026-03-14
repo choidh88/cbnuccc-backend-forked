@@ -28,7 +28,6 @@ import com.cbnuccc.cbnuccc.Util.LogUtil;
 import com.cbnuccc.cbnuccc.Util.SecurityUtil;
 import com.cbnuccc.cbnuccc.Util.StatusCode;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -158,7 +157,6 @@ public class UserService {
     }
 
     // create a user.
-    @Transactional
     public DataWithStatusCode<LimitedUserDto> createUser(MyUser user) {
         user.setUuid(UUID.randomUUID());
         String email = user.getEmail();
@@ -169,7 +167,9 @@ public class UserService {
         if (!checkIsVerifiedEmail(email))
             return new DataWithStatusCode<>(StatusCode.NOT_VERIFIED, null);
 
-        // encoding the password.
+        // checking and encoding the password.
+        if (!securityUtil.checkValidPassword(user.getPassword()))
+            return new DataWithStatusCode<>(StatusCode.INVALID_PASSWORD, null);
         user = encodeUserPassword(user, user.getPassword());
 
         try {
@@ -201,9 +201,6 @@ public class UserService {
         // if the field value is not null, change it.
         if (user.getEmail() != null)
             oldUser.setEmail(user.getEmail());
-        if (user.getPassword() != null) {
-            oldUser = encodeUserPassword(oldUser, user.getPassword());
-        }
         if (user.getRank() != null)
             oldUser.setRank(user.getRank());
         if (user.getSex() != null)
