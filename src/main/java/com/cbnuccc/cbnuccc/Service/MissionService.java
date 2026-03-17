@@ -148,6 +148,7 @@ public class MissionService {
             return StatusCode.NO_MISSION_FOUND;
 
         try {
+            deleteAllMissionImages(id, uuid); // delete all #{id} mission images as deleted the mission.
             missionJpaRepository.deleteById(id);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {

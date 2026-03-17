@@ -360,6 +360,7 @@ public class UserService {
 
         MyUser user = _user.get();
         try {
+            deleteProfileImage(uuid); // delete the user's profile as deleted the user.
             userJpaRepository.delete(user);
             return StatusCode.NO_ERROR;
         } catch (Exception e) {
