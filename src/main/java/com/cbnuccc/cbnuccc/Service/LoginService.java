@@ -37,7 +37,7 @@ public class LoginService {
 
     // create a jwt token.
     private String createToken(Authentication auth, String email, boolean rememberMe) {
-        MyUser user = userJpaRepository.findByEmail(email).get();
+        MyUser user = userJpaRepository.findByEmail(email.toLowerCase()).get();
 
         // 1000 ms/s * 60 s/min * 60 min/h * 24 h/d * 7 d = 604800000 ms/d (7 days)
         // 1000 ms/s * 60 s/min * 60 min/h * 24 h/d * 1 d = 86400000 ms/d (1 day)
@@ -70,7 +70,7 @@ public class LoginService {
 
     // check login-able
     public boolean checkLoginable(String email, String ip) {
-        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
+        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email.toLowerCase(), ip);
         if (_loginRecord.isEmpty())
             return true;
         Login loginRecord = _loginRecord.get();
@@ -85,11 +85,11 @@ public class LoginService {
 
     public StatusCode recordLoginFailure(String email, String ip) {
         // find a login record by email and ip to update it or create it.
-        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email, ip);
+        Optional<Login> _loginRecord = loginJpaRepository.findByEmailAndIp(email.toLowerCase(), ip);
 
         Login loginRecord = new Login();
         loginRecord.setAttempt((short) 0);
-        loginRecord.setEmail(email);
+        loginRecord.setEmail(email.toLowerCase());
         loginRecord.setIp(ip);
 
         // if id exists, then use it to update.
@@ -128,13 +128,13 @@ public class LoginService {
     // process login
     public TokenDto login(String email, String password, boolean rememberMe, String ip) {
         // check the email and the ip
-        if (!checkLoginable(email, ip))
+        if (!checkLoginable(email.toLowerCase(), ip))
             return null;
 
         // create user's token
         String pepperedPassword = securityUtil.addPepper(password);
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                email, pepperedPassword);
+                email.toLowerCase(), pepperedPassword);
         Authentication auth = null;
         try {
             auth = authenticationManagerBuilder.getObject().authenticate(authToken);

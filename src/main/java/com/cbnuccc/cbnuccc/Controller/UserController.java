@@ -96,7 +96,7 @@ public class UserController {
                     LogUtil.makeStatusCodeMessageKV(StatusCode.NO_ENOUGH_ARGS));
             return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
         }
-        String email = body.get("email");
+        String email = body.get("email").toLowerCase();
 
         Optional<UserDto> _user = userService.findUserDtoByEmail(email);
         if (_user.isPresent()) {

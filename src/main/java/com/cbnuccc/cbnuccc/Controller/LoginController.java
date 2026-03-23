@@ -29,18 +29,18 @@ public class LoginController {
     public ResponseEntity<?> loginJWT(HttpServletRequest request, @RequestBody LoginDto data) {
         // login
         String ip = SecurityUtil.getClientIp(request);
-        TokenDto tokenDto = loginService.login(
-                data.getEmail().toLowerCase(), data.getPassword(), data.getRememberMe(), ip);
+        String email = data.getEmail().toLowerCase();
+        TokenDto tokenDto = loginService.login(email, data.getPassword(), data.getRememberMe(), ip);
         if (tokenDto == null) {
             // handle an unexpected situation.
-            StatusCode code = loginService.recordLoginFailure(data.getEmail(), ip);
+            StatusCode code = loginService.recordLoginFailure(email, ip);
 
             if (code.checkIsError()) {
                 LogUtil.printBasicWarnLog(LogHeader.LOGIN, LogUtil.makeStatusCodeMessageKV(code));
                 return code.makeErrorResponseEntity();
             }
 
-            if (!loginService.checkLoginable(data.getEmail(), ip))
+            if (!loginService.checkLoginable(email, ip))
                 return StatusCode.ACCOUNT_LOCKED.makeErrorResponseEntity();
 
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();

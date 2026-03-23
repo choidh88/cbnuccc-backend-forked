@@ -104,7 +104,7 @@ public class JwtFilter extends OncePerRequestFilter {
         Optional<MyUser> _enteredUser = userJpaRepository.findByUuid(uuid);
         if (_enteredUser.isPresent()) {
             MyUser enteredUser = _enteredUser.get();
-            MDC.put("entered_user_email", String.valueOf(enteredUser.getEmail().hashCode()));
+            MDC.put("entered_user_email", String.valueOf(enteredUser.getEmail().toLowerCase().hashCode()));
         }
 
         // print a entering log

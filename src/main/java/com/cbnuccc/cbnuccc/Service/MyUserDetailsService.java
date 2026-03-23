@@ -23,7 +23,7 @@ public class MyUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        var result = userJpaRepository.findByEmail(email);
+        var result = userJpaRepository.findByEmail(email.toLowerCase());
         if (result.isEmpty())
             throw new UsernameNotFoundException("There's no given user.");
 

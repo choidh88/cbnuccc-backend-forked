@@ -37,7 +37,7 @@ public class VerificationService {
     // otherwise, it returns false.
     // also, if the request's email is not on the DB, it returns true.
     private boolean checkExpiredEmailRequest(String email) {
-        Optional<Verification> _verification = verificationJpaRepository.findByEmail(email);
+        Optional<Verification> _verification = verificationJpaRepository.findByEmail(email.toLowerCase());
         if (_verification.isEmpty())
             return true;
 
@@ -110,6 +110,7 @@ public class VerificationService {
 
     // save the email and the code.
     public StatusCode saveEmailVerification(String email, String code) {
+        email = email.toLowerCase();
         try {
             Optional<Verification> _verification = verificationJpaRepository.findByEmail(email);
             Verification verification = new Verification();
@@ -135,6 +136,8 @@ public class VerificationService {
 
     // verify the code.
     public StatusCode verifyCode(String email, String code) {
+        email = email.toLowerCase();
+
         Optional<Verification> _verification = verificationJpaRepository.findByEmail(email);
         if (_verification.isEmpty())
             return StatusCode.NO_EMAIL_FOUND;

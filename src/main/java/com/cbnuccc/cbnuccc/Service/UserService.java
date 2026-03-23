@@ -117,7 +117,7 @@ public class UserService {
 
     // check a user by email if it is duplicated.
     private boolean checkDuplicatedUserByEmail(String email) {
-        Optional<MyUser> user = userJpaRepository.findByEmail(email);
+        Optional<MyUser> user = userJpaRepository.findByEmail(email.toLowerCase());
         return user.isPresent();
     }
 
@@ -125,7 +125,7 @@ public class UserService {
     // otherwise, it returns false.
     // also, if the email is not on the DB, it returns false.
     private boolean checkIsVerifiedEmail(String email) {
-        Optional<Verification> _verification = verificationJpaRepository.findByEmail(email);
+        Optional<Verification> _verification = verificationJpaRepository.findByEmail(email.toLowerCase());
         if (_verification.isEmpty())
             return false;
         Verification verification = _verification.get();
@@ -143,7 +143,7 @@ public class UserService {
 
     // find UserDto by given email.
     public Optional<UserDto> findUserDtoByEmail(String email) {
-        Optional<MyUser> _user = userJpaRepository.findByEmail(email);
+        Optional<MyUser> _user = userJpaRepository.findByEmail(email.toLowerCase());
         if (_user.isEmpty())
             return Optional.ofNullable(null);
         UserDto result = userToUserDto(_user.get());
@@ -179,7 +179,7 @@ public class UserService {
     @Transactional
     public DataWithStatusCode<LimitedUserDto> createUser(MyUser user) {
         user.setUuid(UUID.randomUUID());
-        String email = user.getEmail();
+        String email = user.getEmail().toLowerCase();
 
         if (checkDuplicatedUserByEmail(email))
             return new DataWithStatusCode<>(StatusCode.DUPLICATED_EMAIL, null);
@@ -224,7 +224,7 @@ public class UserService {
 
         // if the field value is not null, change it.
         if (user.getEmail() != null)
-            oldUser.setEmail(user.getEmail());
+            oldUser.setEmail(user.getEmail().toLowerCase());
         if (user.getRank() != null)
             oldUser.setRank(user.getRank());
         if (user.getSex() != null)
@@ -270,7 +270,7 @@ public class UserService {
     // send a email to reset password
     public StatusCode resetPassword(ResetPasswordDto resetPasswordDto) {
         // find matched user
-        Optional<MyUser> _user = userJpaRepository.findByEmail(resetPasswordDto.getEmail());
+        Optional<MyUser> _user = userJpaRepository.findByEmail(resetPasswordDto.getEmail().toLowerCase());
         if (_user.isEmpty())
             return StatusCode.NO_USER_FOUND;
         MyUser user = _user.get();

@@ -27,7 +27,7 @@ public class VerificationController {
             return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
         }
 
-        String email = body.get("email");
+        String email = body.get("email").toLowerCase();
         final String code = verificationService.makeCode();
 
         // send mail with code
@@ -57,7 +57,7 @@ public class VerificationController {
             return StatusCode.NO_ENOUGH_ARGS.makeErrorResponseEntity();
         }
 
-        String email = body.get("email");
+        String email = body.get("email").toLowerCase();
         String code = body.get("code");
 
         // print log and return
