@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT_DIR"
+
+BASE_PACKAGE="com.cbnuccc.cbnuccc"
+BASE_PATH="src/main/java/com/cbnuccc/cbnuccc"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  ./slash /ac "<message>"       git add . and commit with message on the current branch
+  ./slash /push                 switch to release, push it, then return to original branch
+  ./slash /switch "<branch>"    switch to branch, then return to original branch
+  ./slash /new "<name>"         create <Name> Model/Dto/Repository/Service/Controller files
+  ./slash /run                  run the Spring Boot app
+USAGE
+}
+
+current_branch() {
+  git branch --show-current
+}
+
+restore_branch() {
+  local original="$1"
+  local current
+  current="$(current_branch)"
+  if [[ -n "$original" && "$current" != "$original" ]]; then
+    git switch "$original"
+  fi
+}
+
+require_clean_branch_switch() {
+  if [[ -n "$(git status --porcelain)" ]]; then
+    echo "Working tree has changes. Commit or stash before switching branches." >&2
+    exit 1
+  fi
+}
+
+to_pascal_case() {
+  local raw="$1"
+  local normalized
+  normalized="$(printf '%s' "$raw" | sed -E 's/[^[:alnum:]]+/ /g')"
+  awk '{
+    for (i = 1; i <= NF; i++) {
+      word = tolower($i)
+      printf toupper(substr(word, 1, 1)) substr(word, 2)
+    }
+  }' <<< "$normalized"
+}
+
+to_kebab_case() {
+  printf '%s' "$1" \
+    | sed -E 's/([a-z0-9])([A-Z])/\1-\2/g' \
+    | sed -E 's/[^[:alnum:]]+/-/g' \
+    | tr '[:upper:]' '[:lower:]' \
+    | sed -E 's/^-+|-+$//g'
+}
+
+write_if_absent() {
+  local path="$1"
+  local content="$2"
+  if [[ -e "$path" ]]; then
+    echo "Skip existing file: $path"
+    return
+  fi
+  printf '%s\n' "$content" > "$path"
+  echo "Created: $path"
+}
+
+cmd_ac() {
+  local message="${1:-}"
+  if [[ -z "$message" ]]; then
+    echo 'Commit message is required: ./slash /ac "<message>"' >&2
+    exit 1
+  fi
+  git add .
+  git commit -m "$message"
+}
+
+cmd_push() {
+  require_clean_branch_switch
+  local original
+  original="$(current_branch)"
+  trap 'restore_branch "$original"' EXIT
+  if git show-ref --verify --quiet refs/heads/release; then
+    git switch release
+  elif git show-ref --verify --quiet refs/remotes/origin/release; then
+    git switch --track origin/release
+  else
+    git switch -c release
+  fi
+  git push -u origin release
+}
+
+cmd_switch() {
+  local branch="${1:-}"
+  if [[ -z "$branch" ]]; then
+    echo 'Branch name is required: ./slash /switch "<branch>"' >&2
+    exit 1
+  fi
+  require_clean_branch_switch
+  local original
+  original="$(current_branch)"
+  trap 'restore_branch "$original"' EXIT
+  git switch "$branch"
+  git status --short --branch
+}
+
+cmd_new() {
+  local name="${1:-}"
+  if [[ -z "$name" ]]; then
+    echo 'Name is required: ./slash /new "<name>"' >&2
+    exit 1
+  fi
+
+  local class_name route table_name lower_camel
+  class_name="$(to_pascal_case "$name")"
+  route="$(to_kebab_case "$class_name")"
+  table_name="$(printf '%s' "$route" | tr '-' '_')"
+  lower_camel="$(printf '%s%s' "$(tr '[:upper:]' '[:lower:]' <<< "${class_name:0:1}")" "${class_name:1}")"
+
+  if [[ -z "$class_name" ]]; then
+    echo "Could not make a Java class name from: $name" >&2
+    exit 1
+  fi
+
+  mkdir -p "$BASE_PATH/Model" "$BASE_PATH/Dto" "$BASE_PATH/Repository" "$BASE_PATH/Service" "$BASE_PATH/Controller"
+
+  write_if_absent "$BASE_PATH/Model/${class_name}.java" "package ${BASE_PACKAGE}.Model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Setter;
+
+@Data
+@Entity
+@Table(name = \"${table_name}\", schema = \"public\")
+public class ${class_name} {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Setter(value = AccessLevel.NONE)
+    private Long id;
+}"
+
+  write_if_absent "$BASE_PATH/Dto/${class_name}Dto.java" "package ${BASE_PACKAGE}.Dto;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class ${class_name}Dto {
+    private Long id;
+}"
+
+  write_if_absent "$BASE_PATH/Repository/${class_name}JpaRepository.java" "package ${BASE_PACKAGE}.Repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import ${BASE_PACKAGE}.Model.${class_name};
+
+public interface ${class_name}JpaRepository extends JpaRepository<${class_name}, Long> {
+}"
+
+  write_if_absent "$BASE_PATH/Service/${class_name}Service.java" "package ${BASE_PACKAGE}.Service;
+
+import org.springframework.stereotype.Service;
+
+import ${BASE_PACKAGE}.Repository.${class_name}JpaRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ${class_name}Service {
+    private final ${class_name}JpaRepository ${lower_camel}JpaRepository;
+}"
+
+  write_if_absent "$BASE_PATH/Controller/${class_name}Controller.java" "package ${BASE_PACKAGE}.Controller;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import ${BASE_PACKAGE}.Service.${class_name}Service;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+public class ${class_name}Controller {
+    private final ${class_name}Service ${lower_camel}Service;
+
+    @GetMapping(\"/${route}\")
+    public String get${class_name}() {
+        return \"${route}\";
+    }
+}"
+}
+
+cmd_run() {
+  ./gradlew bootRun
+}
+
+main() {
+  local command="${1:-}"
+  shift || true
+
+  case "$command" in
+    /ac) cmd_ac "${1:-}" ;;
+    /push) cmd_push ;;
+    /switch) cmd_switch "${1:-}" ;;
+    /new) cmd_new "${1:-}" ;;
+    /run) cmd_run ;;
+    -h|--help|help|"") usage ;;
+    *)
+      echo "Unknown command: $command" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"
